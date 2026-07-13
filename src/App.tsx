@@ -100,12 +100,14 @@ export default function App() {
   // steps: "review" -> "details" -> "payment" -> "securing" -> "success"
   const [checkoutStep, setCheckoutStep] = useState<"review" | "details" | "payment" | "securing" | "success">("review");
   const [verificationLogs, setVerificationLogs] = useState<string[]>([]);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
   
   // Payment Form States
   const [deliveryName, setDeliveryName] = useState("");
   const [deliveryPhone, setDeliveryPhone] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"telebirr" | "cbe">("telebirr");
+  const [transactionReference, setTransactionReference] = useState("");
   const [uploadedReceipt, setUploadedReceipt] = useState<File | null>(null);
   const [uploadedReceiptName, setUploadedReceiptName] = useState<string>("");
 
@@ -187,41 +189,65 @@ export default function App() {
     setDeliveryName("");
     setDeliveryPhone("");
     setDeliveryAddress("");
+    setTransactionReference("");
     setUploadedReceipt(null);
     setUploadedReceiptName("");
+    setVerificationError(null);
     setIsCheckoutOpen(true);
   };
 
-  const startSecuringProcess = () => {
+  const handleReceiptVerificationSubmit = async () => {
+    if (!transactionReference.trim()) {
+      setVerificationError("Reference Number/ID string is required for automated confirmation mapping.");
+      return;
+    }
+
+    setVerificationError(null);
     setCheckoutStep("securing");
-    setVerificationLogs([]);
+    setVerificationLogs(["INITIALIZING EXCLUSIVE VAULT SECURE...", "CONNECTING EXTRACTION LEDGER ENGINE..."]);
 
-    const logs = [
-      "INITIALIZING EXCLUSIVE VAULT SECURE...",
-      `ALLOCATING SERIAL ID: [${checkoutProduct?.serial}]`,
-      "ESTABLISHING SECURE P2P LEDGER CONNECTION...",
-      `RECORDING DELIVERY METADATA: [Name: ${deliveryName}]`,
-      `ROUTING ADDIS DELIVERY SECTOR: [${deliveryAddress}]`,
-      `VERIFYING PROOF OF RECEIPT: [${uploadedReceiptName || "uploaded_receipt.jpg"}]`,
-      "VAULT CERTIFICATE GEN-3 SIGNED SUCCESSFULLY",
-      "AUTHENTICATION GRANTED. DISPATCH PROTOCOL ARMED."
-    ];
+    try {
+      // Direct integration to automated background verify endpoint
+      const response = await fetch("/api/verify-receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bank: paymentMethod,
+          reference: transactionReference.trim(),
+          expectedAmount: checkoutProduct?.price
+        })
+      });
 
-    let currentLogIndex = 0;
-    const interval = setInterval(() => {
-      if (currentLogIndex < logs.length) {
-        setVerificationLogs(prev => [...prev, logs[currentLogIndex]]);
-        currentLogIndex++;
-      } else {
-        clearInterval(interval);
+      const result = await response.json();
+
+      if (result.status === "SUCCESS") {
+        setVerificationLogs(prev => [
+          ...prev,
+          `PARSING SOURCE BLOCKSTREAM: SECURED DATA MATCHED`,
+          `RECORDING DELIVERY METADATA: [Name: ${deliveryName}]`,
+          `ROUTING ADDIS DELIVERY SECTOR: [${deliveryAddress}]`,
+          `VERIFIED PAYER ENTITY: ${result.payer}`,
+          `CONFIRMED TRANSACTION AMOUNT: ${result.amount} ETB`,
+          "VAULT CERTIFICATE GEN-3 SIGNED SUCCESSFULLY",
+          "AUTHENTICATION GRANTED. DISPATCH PROTOCOL ARMED."
+        ]);
+
         setTimeout(() => {
           setCheckoutStep("success");
           if (checkoutProduct) {
             triggerAssistantDropStyling(checkoutProduct);
           }
-        }, 1200);
+        }, 1500);
+
+      } else {
+        // Handle explicit parsing or matching exceptions triggered by server scripts
+        setCheckoutStep("payment");
+        setVerificationError(result.error || "Receipt extraction failed. Secure terminal validation rejected.");
       }
-    }, 600);
+    } catch (err) {
+      setCheckoutStep("payment");
+      setVerificationError("Network infrastructure mapping error. Failed to reach verification terminal.");
+    }
   };
 
   const triggerAssistantDropStyling = (product: Product) => {
@@ -705,9 +731,9 @@ export default function App() {
                       setIsChatOpen(true);
                       triggerAssistantDropStyling(p);
                     }}
-                    className="w-full bg-transparent text-gray-400 border border-[#222] py-4 rounded-xl font-mono text-xs uppercase tracking-widest hover:border-white hover:text-white transition-all cursor-pointer"
+                    className="w-full bg-transparent border border-white/20 text-white py-3 rounded-xl font-mono text-xs uppercase tracking-wider hover:border-white transition-colors cursor-pointer"
                   >
-                    Style with Vibe Assistant
+                    Discuss Silhouette Vibe
                   </button>
                 </div>
               </div>
@@ -716,317 +742,242 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Checkout / Secured Transaction Modal Flow with Payment Gateway */}
+      {/* COMPACT CHECKOUT MODAL STREAMFLOW */}
       <AnimatePresence>
         {isCheckoutOpen && checkoutProduct && (
-          <div className="fixed inset-0 bg-black/95 z-55 flex items-center justify-center p-6 backdrop-blur-xl overflow-y-auto">
+          <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 backdrop-blur-md">
             <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#070707] border border-[#222] rounded-2xl max-w-lg w-full p-6 text-center relative my-8"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[#050505] border border-[#1c1c1c] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl relative"
             >
-              <button 
-                onClick={() => setIsCheckoutOpen(false)}
-                className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              {/* Close Button */}
+              {checkoutStep !== "securing" && (
+                <button 
+                  onClick={() => setIsCheckoutOpen(false)}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-white p-2 rounded-full cursor-pointer z-10"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
 
-              {/* Step 1: Review Item */}
+              {/* Progress Indicator Head */}
+              <div className="bg-[#0a0a0a] border-b border-[#151515] px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase text-white">
+                  <Lock className="w-3.5 h-3.5 text-[#a8ffb2]" />
+                  <span>Secure Claim Ledger</span>
+                </div>
+                <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">
+                  Step: <span className="text-[#00f3ff] font-bold">{checkoutStep.toUpperCase()}</span>
+                </div>
+              </div>
+
+              {/* STEP 1: REVIEW LOOK */}
               {checkoutStep === "review" && (
-                <div className="flex flex-col gap-5 pt-4">
-                  <div className="flex justify-center">
-                    <div className="p-3 bg-white/5 border border-white/10 rounded-full text-white">
-                      <Lock className="w-6 h-6 text-[#f3ff00]" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-mono font-black uppercase tracking-wider text-white">Secure Look Retrieval</h3>
-                    <p className="text-xs font-mono text-gray-400 mt-1">Review item allocation protocol from Bole flagship network.</p>
-                  </div>
-
-                  <div className="bg-[#101010] border border-[#1e1e1e] rounded-xl p-4 flex gap-4 text-left items-center">
+                <div className="p-6 flex flex-col gap-6">
+                  <div className="flex items-center gap-4 bg-[#0e0e0e] border border-[#1a1a1a] p-4 rounded-xl">
                     <img 
                       src={checkoutProduct.image} 
                       alt={checkoutProduct.name} 
-                      className="w-16 h-20 object-cover rounded border border-white/10"
+                      className="w-16 h-20 object-cover border border-[#222] rounded-md shrink-0"
                     />
-                    <div className="flex-1 overflow-hidden">
-                      <span className="text-[9px] font-mono font-bold text-[#00f3ff] tracking-widest uppercase block mb-0.5">{checkoutProduct.serial}</span>
-                      <h4 className="text-sm font-mono font-bold text-white uppercase tracking-tight truncate">{checkoutProduct.name}</h4>
-                      <p className="text-xs font-mono text-[#a8ffb2] font-bold mt-1">{checkoutProduct.price.toLocaleString()} ETB</p>
+                    <div>
+                      <span className="text-[9px] font-mono text-gray-500 block uppercase tracking-wider">{checkoutProduct.serial}</span>
+                      <h4 className="text-sm font-bold uppercase tracking-tight text-white mt-0.5">{checkoutProduct.name}</h4>
+                      <span className="text-xs font-mono text-[#a8ffb2] font-semibold mt-1 block">{checkoutProduct.price.toLocaleString()} ETB</span>
                     </div>
+                  </div>
+
+                  <div className="bg-[#121212] border border-white/5 p-4 rounded-xl text-xs font-mono text-gray-400 space-y-2">
+                    <p className="m-0 leading-relaxed">
+                      ✦ You are claiming a premium architectural look from the warehouse vaults. Stock allocations are held temporarily for active sessions only.
+                    </p>
                   </div>
 
                   <button 
                     onClick={() => setCheckoutStep("details")}
-                    className="w-full bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#f3ff00] transition-colors cursor-pointer mt-2"
+                    className="w-full bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#f3ff00] transition-colors cursor-pointer flex items-center justify-center gap-2"
                   >
-                    Proceed to Delivery Details
+                    <span>Coordinate Logistics</span>
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               )}
 
-              {/* Step 2: Shipping Details Form */}
+              {/* STEP 2: SHIPPING DETAILS */}
               {checkoutStep === "details" && (
-                <div className="flex flex-col gap-5 pt-4 text-left">
-                  <div className="text-center">
-                    <h3 className="text-lg font-mono font-black uppercase tracking-wider text-white">Free Addis Delivery</h3>
-                    <p className="text-xs font-mono text-gray-400 mt-1">Submit your courier coordinates below.</p>
-                  </div>
-
-                  <div className="space-y-4 font-mono text-xs">
-                    <div>
-                      <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-[#00f3ff]" /> Name
-                      </label>
+                <div className="p-6 flex flex-col gap-4">
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-400 mb-2">Courier Delivery Allocation Coordinates</h3>
+                  
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <User className="absolute left-4 top-3.5 w-4 h-4 text-gray-600" />
                       <input 
                         type="text" 
                         value={deliveryName}
                         onChange={(e) => setDeliveryName(e.target.value)}
-                        placeholder="e.g. Dawit Alula" 
-                        className="w-full bg-[#101010] border border-[#222] rounded-lg p-3 text-white focus:border-[#00f3ff] focus:outline-none"
+                        placeholder="Recipient Name"
+                        className="w-full bg-[#0e0e0e] border border-[#1c1c1c] rounded-xl pl-11 pr-4 py-3.5 text-xs font-mono focus:border-white focus:outline-none text-white transition-colors"
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5 text-[#00f3ff]" /> Phone Number
-                      </label>
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-3.5 w-4 h-4 text-gray-600" />
                       <input 
                         type="text" 
                         value={deliveryPhone}
                         onChange={(e) => setDeliveryPhone(e.target.value)}
-                        placeholder="e.g. +251 912 345 678" 
-                        className="w-full bg-[#101010] border border-[#222] rounded-lg p-3 text-white focus:border-[#00f3ff] focus:outline-none"
+                        placeholder="Phone Number (+251...)"
+                        className="w-full bg-[#0e0e0e] border border-[#1c1c1c] rounded-xl pl-11 pr-4 py-3.5 text-xs font-mono focus:border-white focus:outline-none text-white transition-colors"
+                      />
+                    </div>
+
+                    <div className="relative">
+                      <MapPin className="absolute left-4 top-3.5 w-4 h-4 text-gray-600" />
+                      <input 
+                        type="text" 
+                        value={deliveryAddress}
+                        onChange={(e) => setDeliveryAddress(e.target.value)}
+                        placeholder="Delivery Sector (e.g. Bole, Ayat, Old Airport)"
+                        className="w-full bg-[#0e0e0e] border border-[#1c1c1c] rounded-xl pl-11 pr-4 py-3.5 text-xs font-mono focus:border-white focus:outline-none text-white transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <button 
+                    disabled={!deliveryName || !deliveryPhone || !deliveryAddress}
+                    onClick={() => setCheckoutStep("payment")}
+                    className="w-full bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#f3ff00] disabled:opacity-40 disabled:hover:bg-white transition-all mt-4 cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <span>Proceed to Verification Ledger</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* STEP 3: PAYMENT & TRANSACTION EXTRACTION INTERFACE */}
+              {checkoutStep === "payment" && (
+                <div className="p-6 flex flex-col gap-4">
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-400">Vault Settlement Interface</h3>
+
+                  {/* Payment Gateway Toggle */}
+                  <div className="grid grid-cols-2 gap-3 mb-2">
+                    <button 
+                      onClick={() => setPaymentMethod("telebirr")}
+                      className={`py-3 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer uppercase tracking-wider ${paymentMethod === "telebirr" ? "border-[#00f3ff] bg-[#00f3ff]/5 text-white" : "border-[#1c1c1c] bg-transparent text-gray-500"}`}
+                    >
+                      Telebirr Vault
+                    </button>
+                    <button 
+                      onClick={() => setPaymentMethod("cbe")}
+                      className={`py-3 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer uppercase tracking-wider ${paymentMethod === "cbe" ? "border-[#00f3ff] bg-[#00f3ff]/5 text-white" : "border-[#1c1c1c] bg-transparent text-gray-500"}`}
+                    >
+                      CBE Birr API
+                    </button>
+                  </div>
+
+                  {/* Error Notification Flash */}
+                  {verificationError && (
+                    <div className="bg-red-950/40 border border-red-900 text-red-400 p-3.5 rounded-xl text-xs font-mono tracking-wide leading-relaxed">
+                      ✦ VERIFICATION FAILED: {verificationError}
+                    </div>
+                  )}
+
+                  <div className="bg-[#0e0e0e] border border-[#1a1a1a] p-4 rounded-xl text-xs font-mono space-y-2 text-gray-400">
+                    <p className="m-0 text-white font-bold uppercase tracking-wide">Manual Ledger Settlement Details:</p>
+                    <p className="m-0">Merchant Identification: <span className="text-white font-bold select-all">VIBEVAULT_ADDIS</span></p>
+                    <p className="m-0">Transfer Total: <span className="text-[#a8ffb2] font-black">{checkoutProduct.price.toLocaleString()} ETB</span></p>
+                  </div>
+
+                  {/* Transaction Metadata Mapping Inputs */}
+                  <div className="space-y-3 mt-1">
+                    <div>
+                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 font-bold">Transaction Reference ID String</label>
+                      <input 
+                        type="text"
+                        value={transactionReference}
+                        onChange={(e) => setTransactionReference(e.target.value)}
+                        placeholder="e.g. FT2619582XQ or T7A92..."
+                        className="w-full bg-[#0e0e0e] border border-[#1c1c1c] rounded-xl px-4 py-3 text-xs font-mono uppercase tracking-wide focus:border-[#00f3ff] focus:outline-none text-white transition-colors"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-[#00f3ff]" /> Delivery Address (Addis Ababa)
+                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 font-bold">Proof of Receipt Upload</label>
+                      <label className="w-full h-24 border border-dashed border-[#222] bg-[#0c0c0c] hover:bg-[#111] hover:border-[#333] transition-colors rounded-xl flex flex-col items-center justify-center cursor-pointer p-4 text-center">
+                        <input 
+                          type="file" 
+                          accept="image/*,application/pdf" 
+                          onChange={handleSimulateFileChange} 
+                          className="hidden" 
+                        />
+                        {uploadedReceipt ? (
+                          <div className="flex items-center gap-2 text-xs font-mono text-[#a8ffb2]">
+                            <FileCheck className="w-4 h-4 shrink-0" />
+                            <span className="truncate max-w-[200px] font-bold">{uploadedReceiptName}</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1.5 text-gray-500">
+                            <UploadCloud className="w-5 h-5 text-gray-600" />
+                            <span className="text-[11px] font-mono">Select receipt screenshot data stream</span>
+                          </div>
+                        )}
                       </label>
-                      <textarea 
-                        rows={2}
-                        value={deliveryAddress}
-                        onChange={(e) => setDeliveryAddress(e.target.value)}
-                        placeholder="e.g. Bole, behind Edna Mall, Apt 4B" 
-                        className="w-full bg-[#101010] border border-[#222] rounded-lg p-3 text-white focus:border-[#00f3ff] focus:outline-none resize-none"
-                      />
                     </div>
                   </div>
 
-                  <div className="flex gap-2.5 mt-2">
-                    <button 
-                      onClick={() => setCheckoutStep("review")}
-                      className="w-1/3 bg-transparent border border-[#222] text-gray-400 py-4 rounded-xl font-mono text-xs uppercase hover:text-white"
-                    >
-                      Back
-                    </button>
-                    <button 
-                      onClick={() => {
-                        if (deliveryName.trim() && deliveryPhone.trim() && deliveryAddress.trim()) {
-                          setCheckoutStep("payment");
-                        } else {
-                          alert("Please fill in all courier coordinates.");
-                        }
-                      }}
-                      className="w-2/3 bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#00f3ff]"
-                    >
-                      Continue to Payment
-                    </button>
-                  </div>
+                  <button 
+                    onClick={handleReceiptVerificationSubmit}
+                    className="w-full bg-[#a8ffb2] text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#00f3ff] transition-all mt-3 cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Trigger Verification Endpoint</span>
+                  </button>
                 </div>
               )}
 
-              {/* Step 3: Local Payment Form & Receipt Upload */}
-              {checkoutStep === "payment" && (
-                <div className="flex flex-col gap-4 pt-4 text-left">
-                  <div className="text-center">
-                    <h3 className="text-lg font-mono font-black uppercase tracking-wider text-white">Select Payment Channel</h3>
-                    <p className="text-xs font-mono text-gray-400 mt-1">Make payment of <span className="text-[#a8ffb2] font-bold">{checkoutProduct.price.toLocaleString()} ETB</span> then upload screenshot receipt.</p>
-                  </div>
-
-                  {/* Payment Methods Tabs */}
-                  <div className="grid grid-cols-2 gap-3 mt-1">
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("telebirr")}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all cursor-pointer ${
-                        paymentMethod === "telebirr" 
-                          ? "bg-[#111] border-[#00f3ff]" 
-                          : "bg-black border-[#222] hover:border-white/20"
-                      }`}
-                    >
-                      <img 
-                        src="https://upload.wikimedia.org/wikipedia/commons/1/10/Telebirr_Logo.png" 
-                        alt="Telebirr" 
-                        className="h-7 object-contain mb-1.5 filter brightness-110"
-                        onError={(e) => {
-                          // Fallback in case Wikipedia hotlinking is blocked or changes
-                          e.currentTarget.src = "https://www.ethiotelecom.et/wp-content/uploads/2021/04/telebirr-white.png";
-                        }}
-                      />
-                      <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-gray-300">Telebirr</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("cbe")}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all cursor-pointer ${
-                        paymentMethod === "cbe" 
-                          ? "bg-[#111] border-[#00f3ff]" 
-                          : "bg-black border-[#222] hover:border-white/20"
-                      }`}
-                    >
-                      <img 
-                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Commercial_Bank_of_Ethiopia_logo.svg/1024px-Commercial_Bank_of_Ethiopia_logo.svg.png" 
-                        alt="CBE Birr" 
-                        className="h-7 object-contain mb-1.5 filter brightness-110"
-                        onError={(e) => {
-                          e.currentTarget.src = "https://combanketh.et/images/logo.png";
-                        }}
-                      />
-                      <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-gray-300">CBE BIRR</span>
-                    </button>
-                  </div>
-
-                  {/* Dynamic Accounts Info Block */}
-                  <div className="bg-[#101010] border border-[#1e1e1e] p-4 rounded-xl font-mono text-xs text-gray-300 space-y-2.5">
-                    {paymentMethod === "telebirr" ? (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Service:</span>
-                          <span className="text-[#00f3ff] font-bold">TELEBIRR PAY</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Merchant Phone:</span>
-                          <span className="text-white font-black select-all">0983351611</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Account Name:</span>
-                          <span className="text-white">Eyoel</span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Bank:</span>
-                          <span className="text-[#00f3ff] font-bold">Commercial Bank of Ethiopia (CBE)</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Account Number:</span>
-                          <span className="text-white font-black select-all">1000721425014</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Account Name:</span>
-                          <span className="text-white">Eyoel Hailu Tefera</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Interactive Proof of Payment Area */}
-                  <div>
-                    <label className="block font-mono text-[10px] text-gray-400 uppercase tracking-wider mb-2">
-                      Upload Proof of Payment (Screenshot / Receipt)
-                    </label>
-                    <label className="border border-dashed border-[#333] hover:border-[#00f3ff] bg-[#0c0c0c] rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all">
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={handleSimulateFileChange}
-                      />
-                      {uploadedReceiptName ? (
-                        <>
-                          <FileCheck className="w-8 h-8 text-[#a8ffb2]" />
-                          <div className="text-center">
-                            <span className="block font-mono text-xs text-[#a8ffb2] font-bold max-w-xs truncate">{uploadedReceiptName}</span>
-                            <span className="block font-mono text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">Click to replace file</span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <UploadCloud className="w-8 h-8 text-[#00f3ff] animate-pulse" />
-                          <div className="text-center">
-                            <span className="block font-mono text-xs text-white">Tap to upload file</span>
-                            <span className="block font-mono text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">PNG, JPG or PDF formats accepted</span>
-                          </div>
-                        </>
-                      )}
-                    </label>
-                  </div>
-
-                  <div className="flex gap-2.5 mt-2">
-                    <button 
-                      onClick={() => setCheckoutStep("details")}
-                      className="w-1/3 bg-transparent border border-[#222] text-gray-400 py-4 rounded-xl font-mono text-xs uppercase hover:text-white"
-                    >
-                      Back
-                    </button>
-                    <button 
-                      onClick={() => {
-                        if (uploadedReceiptName) {
-                          startSecuringProcess();
-                        } else {
-                          alert("Please upload your screenshot payment receipt to verify transaction.");
-                        }
-                      }}
-                      className="w-2/3 bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2]"
-                    >
-                      Submit Receipt &amp; Secure Look
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 4: Secure Transaction Loading Screen */}
+              {/* STEP 4: VERIFYING PROTOCOLS LOGSTREAM */}
               {checkoutStep === "securing" && (
-                <div className="flex flex-col gap-6 pt-6">
-                  <div className="flex justify-center">
-                    <Loader2 className="w-10 h-10 text-[#00f3ff] animate-spin" />
+                <div className="p-6 flex flex-col gap-4 bg-black">
+                  <div className="flex items-center gap-3 border-b border-[#111] pb-4">
+                    <Loader2 className="w-5 h-5 text-[#00f3ff] animate-spin" />
+                    <span className="text-xs font-mono text-[#00f3ff] uppercase tracking-widest font-bold">Extracting Terminal Buffer...</span>
                   </div>
-                  <div>
-                    <h3 className="text-md font-mono font-bold uppercase tracking-widest text-white animate-pulse">Running Encryption Ledger</h3>
-                    <p className="text-xs font-mono text-gray-500 mt-1">Verifying proof of payment and dispatching courier routing...</p>
-                  </div>
-
-                  <div className="bg-black border border-[#1e1e1e] p-4 rounded-xl h-40 overflow-y-auto text-left font-mono text-[10px] space-y-1.5 text-gray-400 select-none scrollbar-none">
+                  
+                  <div className="h-48 bg-[#030303] border border-[#151515] p-4 rounded-xl overflow-y-auto font-mono text-[10px] text-gray-500 space-y-2 selection:bg-white/10">
                     {verificationLogs.map((log, lIdx) => (
-                      <div key={lIdx} className="flex gap-2 items-start">
-                        <span className="text-[#00f3ff] shrink-0">&gt;</span>
-                        <span className={lIdx === verificationLogs.length - 1 ? "text-white font-bold" : ""}>{log}</span>
+                      <div key={lIdx} className="font-mono flex items-start gap-1">
+                        <span className="text-gray-700 font-mono shrink-0">&gt;</span>
+                        <span className={log.includes("SUCCESSFULLY") || log.includes("VERIFIED") ? "text-[#a8ffb2]" : log.includes("ALLOCATING") ? "text-white" : "text-gray-400"}>
+                          {log}
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Step 5: Success & Style Flow Initiation */}
+              {/* STEP 5: SUCCESS REDIRECT */}
               {checkoutStep === "success" && (
-                <div className="flex flex-col gap-5 pt-4">
-                  <div className="flex justify-center">
-                    <div className="w-12 h-12 rounded-full bg-[#a8ffb2]/10 border border-[#a8ffb2] flex items-center justify-center text-[#a8ffb2]">
-                      <ShieldCheck className="w-6 h-6" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-mono font-black uppercase tracking-wider text-[#a8ffb2]">Look Secured Successfully</h3>
-                    <p className="text-xs font-mono text-gray-400 mt-1">Exclusivity reserved. Allocation locked into catalog terminal.</p>
+                <div className="p-8 flex flex-col items-center text-center gap-6">
+                  <div className="w-16 h-16 rounded-full bg-[#a8ffb2]/10 border border-[#a8ffb2] flex items-center justify-center text-[#a8ffb2]">
+                    <Check className="w-8 h-8" />
                   </div>
 
-                  <p className="text-xs font-mono text-gray-400 leading-relaxed max-w-sm mx-auto bg-[#101010] p-4 rounded-xl border border-[#1a1a1a]">
-                    Thank you, <span className="text-white font-bold">{deliveryName}</span>. Item <span className="text-[#00f3ff] font-bold">[{checkoutProduct.serial}]</span> has been locked. Our Bole boutique team will verify your receipt and call you at <span className="text-white font-bold">{deliveryPhone}</span> for dispatch.
-                  </p>
+                  <div>
+                    <h2 className="text-xl font-display font-black uppercase text-white tracking-wide m-0">Look Secured Successfully</h2>
+                    <p className="text-[11px] font-mono text-gray-500 mt-2 leading-relaxed">
+                      Your transaction data was verified via backend scripts. Serial item <span className="text-white font-bold">[{checkoutProduct.serial}]</span> has been locked under your digital fashion catalog. Our Bole boutique assistant is on standby to coordinate fast-courier dispatch.
+                    </p>
+                  </div>
 
                   <div className="w-full bg-[#101010] border border-[#1a1a1a] p-4 rounded-xl flex items-center gap-4 text-left">
                     <Sparkles className="w-5 h-5 text-[#00f3ff] animate-pulse flex-shrink-0" />
                     <div>
                       <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">Styling Connection Active</h4>
                       <p className="text-[10px] font-mono text-gray-500 leading-relaxed mt-1">
-                        We have triggered your Vibe Assistant to formulate custom fits matching this order. Open the chat panel to see styling recommendations!
+                        We have triggered Vibe Assistant to formulate a custom designer fit surrounding your new drop. Read the chat panel!
                       </p>
                     </div>
                   </div>
@@ -1038,7 +989,7 @@ export default function App() {
                     }}
                     className="w-full bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2] transition-colors cursor-pointer"
                   >
-                    Open Styling Ideas
+                    Connect with Concierge
                   </button>
                 </div>
               )}
