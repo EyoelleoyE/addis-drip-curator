@@ -384,63 +384,74 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl">
             <AnimatePresence mode="wait">
               {currentProducts.map((product, idx) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="group relative flex flex-col"
-                >
-                  {/* Image Frame with Immersive Design rules */}
-                  <div 
-                    onClick={() => setSelectedProduct(product)}
-                    className="aspect-[3/4] bg-neutral-900 overflow-hidden relative border border-white/5 cursor-pointer rounded-sm"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
-                    
-                    {/* Status Ribbon */}
-                    <div className="absolute top-4 left-4 z-20">
-                      <span className="text-[9px] font-mono font-extrabold uppercase tracking-widest bg-white text-black px-3 py-1">
-                        {product.tag}
-                      </span>
-                    </div>
+  <motion.div
+    key={product.id}
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.5, delay: idx * 0.1 }}
+    className="group relative flex flex-col"
+  >
+    {/* Image Frame with Immersive Design rules */}
+    <div 
+      onClick={() => setSelectedProduct(product)}
+      className="aspect-[3/4] bg-neutral-900 overflow-hidden relative border border-white/5 cursor-pointer rounded-sm"
+    >
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
+      
+      {/* Status Ribbon */}
+      <div className="absolute top-4 left-4 z-20">
+        <span className="text-[9px] font-mono font-extrabold uppercase tracking-widest bg-white text-black px-3 py-1">
+          {product.tag}
+        </span>
+      </div>
 
-                    {/* Serial Sticker Tag */}
-                    <div className="absolute top-4 right-4 z-20">
-                      <span className="text-[9px] font-mono font-bold text-white/60 bg-black/80 border border-white/10 px-2.5 py-1">
-                        {product.serial}
-                      </span>
-                    </div>
+      {/* Serial Sticker Tag */}
+      <div className="absolute top-4 right-4 z-20">
+        <span className="text-[9px] font-mono font-bold text-white/60 bg-black/80 border border-white/10 px-2.5 py-1">
+          {product.serial}
+        </span>
+      </div>
 
-                    <motion.img 
-                      src={product.image} 
-                      alt={product.name}
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full bg-cover bg-center transition-transform duration-700 object-cover group-hover:scale-110"
-                    />
+      <motion.img 
+        src={product.image} 
+        alt={product.name}
+        referrerPolicy="no-referrer"
+        className="w-full h-full bg-cover bg-center transition-transform duration-700 object-cover group-hover:scale-110"
+      />
 
-                    {/* Absolute Bottom Product Info overlay */}
-                    {/* Absolute Bottom Product Info overlay */}
-                    <div className="absolute bottom-8 left-8 z-20 pr-8">
-                    <h3 className="text-2xl font-bold uppercase tracking-tight text-white line-clamp-1 group-hover:text-[#f3ff00] transition-colors font-display">
-                    {product.name}
-                    </h3>
-                    <p className="font-mono text-white/60 mt-1">{product.price.toLocaleString()} ETB</p>
-                    <p className="text-[10px] font-mono text-white/40 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    ALLOCATION LEFT: {product.stock} ITEMS
-                    </p>
-                    </div>
-                  </div>
+      {/* Absolute Bottom Product Info overlay */}
+      <div className="absolute bottom-8 left-8 z-20 pr-8">
+        <h3 className="text-2xl font-bold uppercase tracking-tight text-white line-clamp-1 group-hover:text-[#f3ff00] transition-colors font-display">
+          {product.name}
+        </h3>
+        <p className="font-mono text-white/60 mt-1">{product.price.toLocaleString()} ETB</p>
+        <p className="text-[10px] font-mono text-white/40 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          ALLOCATION LEFT: {product.stock} ITEMS
+        </p>
+      </div>
+    </div>
 
-                  <button 
-                    onClick={() => handleClaim(product)}
-                    className="mt-6 bg-white text-black py-5 uppercase font-black text-xs tracking-[0.2em] hover:bg-neutral-200 hover:shadow-[0_0_20px_rgba(255,255,255,0.25)] transition-all duration-300 cursor-pointer"
-                  >
-                    Claim This Look
-                  </button>
-                </motion.div>
-              ))}
+    {/* Clean, Dedicated Action Layout */}
+    <div className="grid grid-cols-2 gap-2 mt-4">
+      <button 
+        onClick={() => {
+          setIsChatOpen(true);
+          triggerAssistantDropStyling(product);
+        }}
+        className="bg-transparent border border-white/20 text-white py-4 uppercase font-bold text-[10px] tracking-[0.15em] hover:border-[#f3ff00] hover:text-[#f3ff00] transition-all duration-300 cursor-pointer"
+      >
+        Style Fit
+      </button>
+      <button 
+        onClick={() => handleClaim(product)}
+        className="bg-white text-black py-4 uppercase font-black text-[10px] tracking-[0.15em] hover:bg-[#f3ff00] hover:text-black transition-all duration-300 cursor-pointer"
+      >
+        Claim Look
+      </button>
+    </div>
+  </motion.div>
+))}
             </AnimatePresence>
           </div>
         </div>
