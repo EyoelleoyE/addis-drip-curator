@@ -31,14 +31,13 @@ interface Product {
   serial: string;
 }
 
-
 const PRODUCTS: { women: Product[]; men: Product[] } = {
   women: [
     {
       id: "contour-top",
       name: "Aesthetic Ribbed Contour Top",
       price: 1450,
-      image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop", // Clean premium streetwear placeholder
+      image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop", 
       desc: "Surgical body-contouring rib structure with signature raw double-stitch micro hems. Engineered to hold the perfect modern streetwear silhouette.",
       tag: "TRENDING DROP",
       stock: 4,
@@ -89,8 +88,6 @@ interface ChatMessage {
 export default function App() {
   const [activeSection, setActiveSection] = useState<"women" | "men">("women");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [activeSection, setActiveSection] = useState<"women" | "men">("women");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
   // Checkout modal state
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -98,14 +95,8 @@ export default function App() {
   const [checkoutStep, setCheckoutStep] = useState<"review" | "securing" | "success">("review");
   const [verificationLogs, setVerificationLogs] = useState<string[]>([]);
   
-  // PLACE THE RECEIPT PREVIEW STATE HERE:
+  // Receipt preview state
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
-  
-  // Checkout modal state
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [checkoutProduct, setCheckoutProduct] = useState<Product | null>(null);
-  const [checkoutStep, setCheckoutStep] = useState<"review" | "securing" | "success">("review");
-  const [verificationLogs, setVerificationLogs] = useState<string[]>([]);
 
   // Chat/Vibe Assistant state
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -120,15 +111,13 @@ export default function App() {
   const [isChatTyping, setIsChatTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Dynamic Addis Ababa Local Clock (UTC+3)
+  // Dynamic Addis Ababa Local Clock (EAT)
   const [addisTime, setAddisTime] = useState("");
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      // UTC time
       const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-      // Addis Ababa is UTC+3
       const addisOffset = 3;
       const addisDate = new Date(utc + (3600000 * addisOffset));
       
@@ -144,18 +133,16 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Expose filterSection and initiatePurchase globally for backend integration tests / backward compatibility
+  // Expose filterSection and initiatePurchase globally for framework testing
   useEffect(() => {
     (window as any).filterSection = (gender: "women" | "men") => {
       setActiveSection(gender);
     };
     (window as any).initiatePurchase = (itemName: string, price: number) => {
-      // Find the product matching the name in our DB to trigger standard beautiful checkout modal
       let matchedProd = PRODUCTS.women.find(p => p.name === itemName) || 
                         PRODUCTS.men.find(p => p.name === itemName);
       
       if (!matchedProd) {
-        // Fallback mockup product if none matches
         matchedProd = {
           id: "custom-item",
           name: itemName,
@@ -186,6 +173,7 @@ export default function App() {
   const handleClaim = (product: Product) => {
     setCheckoutProduct(product);
     setCheckoutStep("review");
+    setReceiptPreview(null);
     setIsCheckoutOpen(true);
   };
 
@@ -232,7 +220,6 @@ export default function App() {
 
     setMessages(prev => [...prev, introMsg]);
 
-    // Send to server
     setTimeout(async () => {
       try {
         const response = await fetch("/api/vibe-assistant", {
@@ -368,7 +355,7 @@ export default function App() {
             <div className="text-left md:text-right font-mono">
               <span className="block text-[10px] tracking-[0.3em] uppercase opacity-40 font-bold mb-1 font-mono">Vault Status</span>
               <span className="block text-sm text-[#a8ffb2] font-bold tracking-wide font-mono">ENCRYPTED_ACCESS_GRANTED</span>
-              <span className="block text-[10px] text-gray-500 mt-1 font-mono">{addisTime || "UTC+03:00"}</span>
+              <span className="block text-[10px] text-gray-500 mt-1 font-mono">{addisTime || "EAT+03:00"}</span>
             </div>
           </div>
 
@@ -396,74 +383,74 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl">
             <AnimatePresence mode="wait">
               {currentProducts.map((product, idx) => (
-  <motion.div
-    key={product.id}
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20 }}
-    transition={{ duration: 0.5, delay: idx * 0.1 }}
-    className="group relative flex flex-col"
-  >
-    {/* Image Frame with Immersive Design rules */}
-    <div 
-      onClick={() => setSelectedProduct(product)}
-      className="aspect-[3/4] bg-neutral-900 overflow-hidden relative border border-white/5 cursor-pointer rounded-sm"
-    >
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
-      
-      {/* Status Ribbon */}
-      <div className="absolute top-4 left-4 z-20">
-        <span className="text-[9px] font-mono font-extrabold uppercase tracking-widest bg-white text-black px-3 py-1">
-          {product.tag}
-        </span>
-      </div>
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  className="group relative flex flex-col"
+                >
+                  {/* Image Frame */}
+                  <div 
+                    onClick={() => setSelectedProduct(product)}
+                    className="aspect-[3/4] bg-neutral-900 overflow-hidden relative border border-white/5 cursor-pointer rounded-sm"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
+                    
+                    {/* Status Ribbon */}
+                    <div className="absolute top-4 left-4 z-20">
+                      <span className="text-[9px] font-mono font-extrabold uppercase tracking-widest bg-white text-black px-3 py-1">
+                        {product.tag}
+                      </span>
+                    </div>
 
-      {/* Serial Sticker Tag */}
-      <div className="absolute top-4 right-4 z-20">
-        <span className="text-[9px] font-mono font-bold text-white/60 bg-black/80 border border-white/10 px-2.5 py-1">
-          {product.serial}
-        </span>
-      </div>
+                    {/* Serial Sticker Tag */}
+                    <div className="absolute top-4 right-4 z-20">
+                      <span className="text-[9px] font-mono font-bold text-white/60 bg-black/80 border border-white/10 px-2.5 py-1">
+                        {product.serial}
+                      </span>
+                    </div>
 
-      <motion.img 
-        src={product.image} 
-        alt={product.name}
-        referrerPolicy="no-referrer"
-        className="w-full h-full bg-cover bg-center transition-transform duration-700 object-cover group-hover:scale-110"
-      />
+                    <motion.img 
+                      src={product.image} 
+                      alt={product.name}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full bg-cover bg-center transition-transform duration-700 object-cover group-hover:scale-110"
+                    />
 
-      {/* Absolute Bottom Product Info overlay */}
-      <div className="absolute bottom-8 left-8 z-20 pr-8">
-        <h3 className="text-2xl font-bold uppercase tracking-tight text-white line-clamp-1 group-hover:text-[#f3ff00] transition-colors font-display">
-          {product.name}
-        </h3>
-        <p className="font-mono text-white/60 mt-1">{product.price.toLocaleString()} ETB</p>
-        <p className="text-[10px] font-mono text-white/40 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          ALLOCATION LEFT: {product.stock} ITEMS
-        </p>
-      </div>
-    </div>
+                    {/* Absolute Bottom Product Info overlay */}
+                    <div className="absolute bottom-8 left-8 z-20 pr-8">
+                      <h3 className="text-2xl font-bold uppercase tracking-tight text-white line-clamp-1 group-hover:text-[#f3ff00] transition-colors font-display">
+                        {product.name}
+                      </h3>
+                      <p className="font-mono text-white/60 mt-1">{product.price.toLocaleString()} ETB</p>
+                      <p className="text-[10px] font-mono text-white/40 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        ALLOCATION LEFT: {product.stock} ITEMS
+                      </p>
+                    </div>
+                  </div>
 
-    {/* Clean, Dedicated Action Layout */}
-    <div className="grid grid-cols-2 gap-2 mt-4">
-      <button 
-        onClick={() => {
-          setIsChatOpen(true);
-          triggerAssistantDropStyling(product);
-        }}
-        className="bg-transparent border border-white/20 text-white py-4 uppercase font-bold text-[10px] tracking-[0.15em] hover:border-[#f3ff00] hover:text-[#f3ff00] transition-all duration-300 cursor-pointer"
-      >
-        Style Fit
-      </button>
-      <button 
-        onClick={() => handleClaim(product)}
-        className="bg-white text-black py-4 uppercase font-black text-[10px] tracking-[0.15em] hover:bg-[#f3ff00] hover:text-black transition-all duration-300 cursor-pointer"
-      >
-        Claim Look
-      </button>
-    </div>
-  </motion.div>
-))}
+                  {/* Dedicated Action Layout */}
+                  <div className="grid grid-cols-2 gap-2 mt-4">
+                    <button 
+                      onClick={() => {
+                        setIsChatOpen(true);
+                        triggerAssistantDropStyling(product);
+                      }}
+                      className="bg-transparent border border-white/20 text-white py-4 uppercase font-bold text-[10px] tracking-[0.15em] hover:border-[#f3ff00] hover:text-[#f3ff00] transition-all duration-300 cursor-pointer"
+                    >
+                      Style Fit
+                    </button>
+                    <button 
+                      onClick={() => handleClaim(product)}
+                      className="bg-white text-black py-4 uppercase font-black text-[10px] tracking-[0.15em] hover:bg-[#f3ff00] hover:text-black transition-all duration-300 cursor-pointer"
+                    >
+                      Claim Look
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
             </AnimatePresence>
           </div>
         </div>
@@ -498,7 +485,7 @@ export default function App() {
         </button>
       </div>
 
-      {/* Slide-out High-End Vibe Assistant Panel (Glassmorphism & Neon) */}
+      {/* Slide-out Vibe Assistant Panel */}
       <AnimatePresence>
         {isChatOpen && (
           <motion.div 
@@ -531,7 +518,7 @@ export default function App() {
               </button>
             </div>
 
-            {/* Chat Body (Scrollable messages) */}
+            {/* Chat Body */}
             <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
               {messages.map((m) => (
                 <div 
@@ -665,7 +652,7 @@ export default function App() {
                   <div className="flex flex-col gap-2 mt-2 bg-[#121212] border border-[#1a1a1a] p-4 rounded-xl font-mono text-xs text-gray-400">
                     <div className="flex justify-between">
                       <span>Exclusivity Score:</span>
-                      <span className="text-white font-bold text-[#00f3ff]">9.8/10</span>
+                      <span className="text-[#00f3ff] font-bold">9.8/10</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Warehouse Location:</span>
@@ -707,7 +694,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Checkout / Secured Transaction Modal Flow */}
+      {/* Checkout / Secured Transaction Modal Flow (FIXED & FULLY RESTORED) */}
       <AnimatePresence>
         {isCheckoutOpen && checkoutProduct && (
           <div className="fixed inset-0 bg-black/95 z-55 flex items-center justify-center p-6 backdrop-blur-xl">
@@ -715,244 +702,107 @@ export default function App() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#070707] border border-[#222] rounded-2xl max-w-lg w-full p-8 relative flex flex-col gap-6"
+              className="bg-[#070707] border border-[#222] rounded-2xl max-w-lg w-full p-6 text-center relative"
             >
-              {checkoutStep !== "securing" && (
-                <button 
-                  onClick={() => setIsCheckoutOpen(false)}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-white p-2 rounded-full cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
+              <button 
+                onClick={() => setIsCheckoutOpen(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
               {checkoutStep === "review" && (
-                <div className="flex flex-col gap-6">
-                  <div className="flex flex-col gap-1 text-center">
-                    <span className="text-[10px] font-mono text-[#00f3ff] tracking-[0.25em] uppercase font-bold font-mono">SECURE TRANSACTION PROTOCOL</span>
-                    <h3 className="text-2xl font-display font-black text-white uppercase mt-1">Review Vault Request</h3>
-                  </div>
-
-                  <div className="flex gap-4 p-4 bg-[#101010] border border-[#1a1a1a] rounded-xl">
-                    <div className="w-20 h-20 rounded-lg overflow-hidden border border-[#222] flex-shrink-0">
-                      <img src={checkoutProduct.image} alt={checkoutProduct.name} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex flex-col justify-center">
-                      <span className="text-[9px] font-mono text-[#888] font-mono">{checkoutProduct.serial}</span>
-                      <h4 className="text-md font-mono font-bold text-white font-mono">{checkoutProduct.name}</h4>
-                      <span className="text-sm font-mono text-[#a8ffb2] font-semibold mt-1 font-mono">{checkoutProduct.price.toLocaleString()} ETB</span>
+                <div className="flex flex-col gap-5 pt-4">
+                  <div className="flex justify-center">
+                    <div className="p-3 bg-white/5 border border-white/10 rounded-full text-white">
+                      <Lock className="w-6 h-6 text-[#f3ff00]" />
                     </div>
                   </div>
+                  <div>
+                    <h3 className="text-xl font-mono font-black uppercase tracking-wider text-white">Secure Look Retrieval</h3>
+                    <p className="text-xs font-mono text-gray-400 mt-1">Review item allocation protocol from Bole flagship network.</p>
+                  </div>
 
-                  <div className="flex flex-col gap-3 font-mono text-xs text-gray-400 border-t border-b border-[#1a1a1a] py-4">
-                    <div className="flex justify-between">
-                      <span>Vault Surcharge:</span>
-                      <span className="text-white font-bold">0.00 ETB</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Authentication Tier:</span>
-                      <span className="text-[#00f3ff]">GEN-3 COLLECTOR</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Addis Ababa Delivery:</span>
-                      <span className="text-white">BOLE ZONE DEDICATED SPEED-COURIER</span>
+                  <div className="bg-[#101010] border border-[#1e1e1e] rounded-xl p-4 flex gap-4 text-left items-center">
+                    <img 
+                      src={checkoutProduct.image} 
+                      alt={checkoutProduct.name} 
+                      className="w-16 h-20 object-cover rounded border border-white/10"
+                    />
+                    <div className="flex-1 overflow-hidden">
+                      <span className="text-[9px] font-mono font-bold text-[#00f3ff] tracking-widest uppercase block mb-0.5">{checkoutProduct.serial}</span>
+                      <h4 className="text-sm font-mono font-bold text-white uppercase tracking-tight truncate">{checkoutProduct.name}</h4>
+                      <p className="text-xs font-mono text-[#a8ffb2] font-bold mt-1">{checkoutProduct.price.toLocaleString()} ETB</p>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 pt-2">
-                    <button 
-                      onClick={startSecuringProcess}
-                      className="w-full bg-[#a8ffb2] text-black font-mono font-bold uppercase py-4 rounded-xl text-xs tracking-wider hover:bg-white hover:shadow-[0_0_20px_rgba(168,255,178,0.3)] transition-all cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <Lock className="w-3.5 h-3.5" />
-                      Secure allocation with courier
-                    </button>
-                    <p className="text-[9px] font-mono text-gray-600 text-center uppercase tracking-wide leading-relaxed font-mono">
-                      Allocation holds for exactly 10 minutes. Click to process Addis vault courier reservation.
-                    </p>
-                  </div>
+                  <button 
+                    onClick={startSecuringProcess}
+                    className="w-full bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#f3ff00] transition-colors cursor-pointer mt-2"
+                  >
+                    Confirm &amp; Lock Look
+                  </button>
                 </div>
               )}
 
               {checkoutStep === "securing" && (
-                <div className="flex flex-col gap-6 py-6 items-center">
-                  <Loader2 className="w-12 h-12 text-[#00f3ff] animate-spin" />
-                  
-                  <div className="flex flex-col gap-1 text-center">
-                    <span className="text-[10px] font-mono text-[#00f3ff] tracking-[0.25em] uppercase font-bold font-mono">CYBER SECURE IN PROGRESS</span>
-                    <h3 className="text-xl font-display font-black text-white uppercase mt-1">Securing Your Look...</h3>
+                <div className="flex flex-col gap-6 pt-6">
+                  <div className="flex justify-center">
+                    <Loader2 className="w-10 h-10 text-[#00f3ff] animate-spin" />
+                  </div>
+                  <div>
+                    <h3 className="text-md font-mono font-bold uppercase tracking-widest text-white animate-pulse">Running Encryption Ledger</h3>
+                    <p className="text-xs font-mono text-gray-500 mt-1">Sourcing isolated signature keys...</p>
                   </div>
 
-                  {/* Matrix/Terminal Log outputs */}
-                  <div className="w-full bg-[#0d0d0d] border border-[#1a1a1a] p-4 rounded-xl font-mono text-[10px] text-[#00f3ff] flex flex-col gap-1.5 h-36 overflow-y-auto">
-                    {verificationLogs.map((log, idx) => (
-                      <div key={idx} className="flex items-center gap-2 font-mono">
-                        <span className="text-[#444] select-none font-mono">&gt;</span>
-                        <span className="font-mono">{log}</span>
+                  <div className="bg-black border border-[#1e1e1e] p-4 rounded-xl h-40 overflow-y-auto text-left font-mono text-[10px] space-y-1.5 text-gray-400 select-none scrollbar-none">
+                    {verificationLogs.map((log, lIdx) => (
+                      <div key={lIdx} className="flex gap-2 items-start">
+                        <span className="text-[#00f3ff] shrink-0">&gt;</span>
+                        <span className={lIdx === verificationLogs.length - 1 ? "text-white font-bold" : ""}>{log}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {checkoutStep === "success" && checkoutProduct && (
-  <div className="flex flex-col gap-6 items-center py-4">
-    {/* INTERNAL CONDITIONAL: IF NOT SUBMITTED YET */}
-    {!receiptPreview?.startsWith("SUBMITTED_") ? (
-      <>
-        <div className="w-16 h-16 rounded-full bg-[#a8ffb2]/10 border border-[#a8ffb2] flex items-center justify-center text-[#a8ffb2] mb-1 animate-pulse">
-          <ShieldCheck className="w-8 h-8" />
-        </div>
+              {checkoutStep === "success" && (
+                <div className="flex flex-col gap-5 pt-4">
+                  <div className="flex justify-center">
+                    <div className="w-12 h-12 rounded-full bg-[#a8ffb2]/10 border border-[#a8ffb2] flex items-center justify-center text-[#a8ffb2]">
+                      <ShieldCheck className="w-6 h-6" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-mono font-black uppercase tracking-wider text-[#a8ffb2]">Look Secured Successfully</h3>
+                    <p className="text-xs font-mono text-gray-400 mt-1">Exclusivity reserved. Allocation locked into catalog terminal.</p>
+                  </div>
 
-        <div className="flex flex-col gap-1 text-center">
-          <span className="text-[10px] font-mono text-[#a8ffb2] tracking-[0.25em] uppercase font-bold">ALLOCATION HELD</span>
-          <h3 className="text-2xl font-display font-black text-white uppercase mt-1">Look Reserved!</h3>
-        </div>
+                  <p className="text-xs font-mono text-gray-400 leading-relaxed max-w-sm mx-auto bg-[#101010] p-4 rounded-xl border border-[#1a1a1a]">
+                    Item <span className="text-white font-bold">[{checkoutProduct.serial}]</span> has been locked under your digital fashion catalog. Our Bole boutique assistant is on standby to coordinate fast-courier dispatch.
+                  </p>
 
-        <p className="text-xs font-mono text-gray-400 max-w-sm text-center leading-relaxed">
-          Drop Serial <span className="text-[#f3ff00] font-bold">[{checkoutProduct.serial}]</span> has been locked for the next 20 minutes under your collector tier.
-        </p>
+                  <div className="w-full bg-[#101010] border border-[#1a1a1a] p-4 rounded-xl flex items-center gap-4 text-left">
+                    <Sparkles className="w-5 h-5 text-[#00f3ff] animate-pulse flex-shrink-0" />
+                    <div>
+                      <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">Styling Connection Active</h4>
+                      <p className="text-[10px] font-mono text-gray-500 leading-relaxed mt-1">
+                        We have triggered Vibe Assistant to formulate a custom designer fit surrounding your new drop. Read the chat panel!
+                      </p>
+                    </div>
+                  </div>
 
-        {/* BANK DETAILS TERMINAL CARD */}
-        <div className="w-full bg-[#0a0a0a] border border-[#222] p-4 rounded-xl text-left flex flex-col gap-2 font-mono text-xs">
-          <h4 className="text-[#f3ff00] font-bold uppercase tracking-wider">1. SECURE TRANSFER</h4>
-          <p className="text-gray-400 text-[11px] leading-relaxed">
-            Please transfer <span className="text-white font-bold">{checkoutProduct.price.toLocaleString()} ETB</span> to lock in this drop:
-          </p>
-          <div className="bg-[#111] p-3 rounded border border-white/5 space-y-1.5 text-[11px]">
-            <div><span className="text-gray-500">Telebirr:</span> <span className="text-white font-bold select-all">0983351611 (Eyoel)</span></div>
-            <div><span className="text-gray-500">CBE Birr:</span> <span className="text-white font-bold select-all">1000721425014 (Eyoel Hailu Tefera)</span></div>
-          </div>
-        </div>
-
-        {/* DISPATCH TARGET FORM */}
-        <form 
-          onSubmit={(e) => {
-            e.preventDefault();
-            setReceiptPreview("SUBMITTED_SUCCESSFULLY");
-          }}
-          className="w-full flex flex-col gap-4 font-mono text-xs text-left"
-        >
-          <h4 className="text-[#00f3ff] font-bold uppercase tracking-wider border-b border-white/5 pb-2">
-            2. PROVIDE DISPATCH TARGET
-          </h4>
-
-          {/* Full Name Input */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Full Name</label>
-            <input 
-              type="text" 
-              required
-              placeholder="e.g. Tariku Kebede"
-              className="w-full bg-[#0e0e0e] border border-[#222] text-white text-xs rounded-lg px-4 py-3 focus:border-[#f3ff00] focus:outline-none transition-all placeholder:text-gray-700"
-            />
-          </div>
-
-          {/* Phone Number Input */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Phone Number</label>
-            <input 
-              type="tel" 
-              required
-              placeholder="e.g. 0912345678"
-              className="w-full bg-[#0e0e0e] border border-[#222] text-white text-xs rounded-lg px-4 py-3 focus:border-[#f3ff00] focus:outline-none transition-all placeholder:text-gray-700"
-            />
-          </div>
-
-          {/* Delivery Address Input */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Delivery Address (Free Delivery)</label>
-            <input 
-              type="text" 
-              required
-              placeholder="e.g. Bole Atlas, near Edna Mall, Apt 4B"
-              className="w-full bg-[#0e0e0e] border border-[#222] text-white text-xs rounded-lg px-4 py-3 focus:border-[#f3ff00] focus:outline-none transition-all placeholder:text-gray-700"
-            />
-          </div>
-
-          {/* File Upload for Proof of Payment Receipt */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Proof of Payment Receipt</label>
-            
-            <div className="relative w-full bg-[#0e0e0e] border border-dashed border-[#333] hover:border-[#00f3ff] transition-all rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer group">
-              <input 
-                type="file" 
-                required
-                accept="image/*"
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setReceiptPreview(reader.result as string);
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
-              />
-              
-              {/* Image Preview Window inside the upload box */}
-              {receiptPreview && !receiptPreview.startsWith("SUBMITTED_") ? (
-                <div className="w-full flex flex-col items-center gap-2 z-10 pointer-events-none">
-                  <img 
-                    src={receiptPreview} 
-                    alt="Receipt thumbnail" 
-                    className="max-h-32 object-contain border border-white/10 rounded"
-                  />
-                  <span className="text-[#a8ffb2] font-bold text-[11px]">RECEIPT ATTACHED SUCCESSFULLY</span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-1 text-center pointer-events-none">
-                  <span className="text-gray-500 text-[11px] group-hover:text-white transition-colors">
-                    Click to upload transfer screenshot / receipt
-                  </span>
-                  <span className="text-[9px] text-gray-600 uppercase tracking-widest font-bold">
-                    Supports JPEG, PNG
-                  </span>
+                  <button 
+                    onClick={() => {
+                      setIsCheckoutOpen(false);
+                      setIsChatOpen(true);
+                    }}
+                    className="w-full bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2] transition-colors cursor-pointer"
+                  >
+                    Connect with Concierge
+                  </button>
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Submit/Done Button below the image area */}
-          <button 
-            type="submit"
-            className="w-full bg-white text-black py-4 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2] hover:shadow-[0_0_20px_rgba(168,255,178,0.2)] transition-all duration-300 mt-2 cursor-pointer text-center font-mono"
-          >
-            Done &amp; Submit Order
-          </button>
-        </form>
-      </>
-    ) : (
-      /* ORDER SECURED NOTIFICATION STATE */
-      <div className="flex flex-col items-center text-center py-8 gap-4 font-mono animate-fade-in">
-        <div className="w-16 h-16 rounded-full bg-[#a8ffb2] flex items-center justify-center text-black">
-          <Check className="w-8 h-8 stroke-[3]" />
-        </div>
-        <div>
-          <span className="text-[10px] text-[#a8ffb2] tracking-[0.3em] uppercase font-bold">SYSTEM BROADCAST</span>
-          <h3 className="text-2xl font-display font-black text-white uppercase mt-1">DISPATCH LOCKED</h3>
-        </div>
-        <p className="text-xs text-gray-400 max-w-sm leading-relaxed">
-          Your delivery details and transaction proof for <span className="text-white font-bold">[{checkoutProduct.name}]</span> have been verified and saved to the secure ledger. 
-        </p>
-        <div className="bg-[#0e0e0e] border border-[#1c1c1c] p-4 rounded-xl text-[11px] text-gray-500 max-w-xs">
-          📦 Free courier delivery routing initiated via Bole Zone Central Terminal. Expect arrival within 2-4 hours.
-        </div>
-        <button 
-          onClick={() => {
-            setReceiptPreview(null);
-            setIsCheckoutOpen(false);
-          }}
-          className="mt-4 text-xs uppercase text-white/40 hover:text-white tracking-widest underline decoration-white/20 hover:decoration-white transition-all cursor-pointer"
-        >
-          Return to Vault Terminal
-        </button>
-      </div>
-    )}
-  </div>
-)}
             </motion.div>
           </div>
         )}
