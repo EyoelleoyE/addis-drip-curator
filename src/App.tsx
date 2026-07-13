@@ -105,7 +105,6 @@ export default function App() {
   const [deliveryPhone, setDeliveryPhone] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"telebirr" | "cbe">("telebirr");
-  const [transactionReference, setTransactionReference] = useState("");
   const [uploadedReceipt, setUploadedReceipt] = useState<File | null>(null);
   const [uploadedReceiptName, setUploadedReceiptName] = useState<string>("");
 
@@ -184,7 +183,6 @@ export default function App() {
     setDeliveryName("");
     setDeliveryPhone("");
     setDeliveryAddress("");
-    setTransactionReference("");
     setUploadedReceipt(null);
     setUploadedReceiptName("");
     setVerificationError(null);
@@ -192,55 +190,27 @@ export default function App() {
   };
 
   const startSecuringProcess = async () => {
-    if (!transactionReference.trim()) {
-      setVerificationError("Reference Number string is required to extract ledger block logs.");
-      return;
-    }
-
     setVerificationError(null);
     setCheckoutStep("securing");
-    setVerificationLogs(["INITIALIZING EXCLUSIVE VAULT SECURE...", "CONNECTING EXTRACTION LEDGER ENGINE..."]);
+    setVerificationLogs(["INITIALIZING ORDER TRANSACTION PACKET...", "MAPPING DELIVERY COURIER ADDRESS..."]);
 
-    try {
-      const response = await fetch("/api/verify-receipt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bank: paymentMethod,
-          reference: transactionReference.trim(),
-          expectedAmount: checkoutProduct?.price
-        })
-      });
+    setTimeout(() => {
+      setVerificationLogs(prev => [
+        ...prev,
+        `ROUTING ADDIS DELIVERY SECTOR: [${deliveryAddress}]`,
+        `RECORDING CLIENT METADATA: [Name: ${deliveryName}]`,
+        `VERIFYING UPLOADED LOG: [${uploadedReceiptName || "None"}]`,
+        `CREATING VAULT INVENTORY RESERVATION STAMP...`,
+        "ORDER LOGGING PIPELINE GRANTED. DISPATCH PROTOCOL WAITING ON VERIFICATION."
+      ]);
 
-      const result = await response.json();
-
-      if (result.status === "SUCCESS") {
-        setVerificationLogs(prev => [
-          ...prev,
-          `PARSING SOURCE BLOCKSTREAM: SECURED DATA MATCHED`,
-          `RECORDING DELIVERY METADATA: [Name: ${deliveryName}]`,
-          `ROUTING ADDIS DELIVERY SECTOR: [${deliveryAddress}]`,
-          `VERIFIED PAYER ENTITY: ${result.payer}`,
-          `CONFIRMED TRANSACTION AMOUNT: ${result.amount} ETB`,
-          "VAULT CERTIFICATE GEN-3 SIGNED SUCCESSFULLY",
-          "AUTHENTICATION GRANTED. DISPATCH PROTOCOL ARMED."
-        ]);
-
-        setTimeout(() => {
-          setCheckoutStep("success");
-          if (checkoutProduct) {
-            triggerAssistantDropStyling(checkoutProduct);
-          }
-        }, 1500);
-
-      } else {
-        setCheckoutStep("payment");
-        setVerificationError(result.error || "Receipt extraction failed. Secure terminal validation rejected.");
-      }
-    } catch (err) {
-      setCheckoutStep("payment");
-      setVerificationError("Network infrastructure mapping error. Failed to reach verification terminal.");
-    }
+      setTimeout(() => {
+        setCheckoutStep("success");
+        if (checkoutProduct) {
+          triggerAssistantDropStyling(checkoutProduct);
+        }
+      }, 1500);
+    }, 1500);
   };
 
   const triggerAssistantDropStyling = (product: Product) => {
@@ -619,7 +589,7 @@ export default function App() {
                   </div>
                 )}
 
-                {/* RESTORED STEP 2: COURIER & SHIPPING COORDINATES */}
+                {/* Step 2: Courier & Shipping Coordinates */}
                 {checkoutStep === "details" && (
                   <div className="flex flex-col gap-5 pt-4 text-left">
                     <div className="text-center">
@@ -691,7 +661,7 @@ export default function App() {
                   </div>
                 )}
 
-                {/* RESTORED STEP 3: LOCAL PAYMENT TERMINAL & RECEIPT SUBMISSION */}
+                {/* Step 3: Local Payment Terminal & Receipt Submission */}
                 {checkoutStep === "payment" && (
                   <div className="flex flex-col gap-4 pt-4 text-left">
                     <div className="text-center">
@@ -700,12 +670,6 @@ export default function App() {
                         Send <span className="text-[#a8ffb2] font-bold">{checkoutProduct.price.toLocaleString()} ETB</span> then upload your payment record.
                       </p>
                     </div>
-
-                    {verificationError && (
-                      <div className="bg-red-950/40 border border-red-900 text-red-400 p-3.5 rounded-xl text-xs font-mono tracking-wide leading-relaxed">
-                        ✦ VERIFICATION FAILED: {verificationError}
-                      </div>
-                    )}
 
                     {/* Platform Selection Tabs */}
                     <div className="grid grid-cols-2 gap-3 mt-1">
@@ -748,11 +712,15 @@ export default function App() {
                         <>
                           <div className="flex justify-between">
                             <span className="text-gray-500">Channel:</span>
-                            <span className="text-[#00f3ff] font-bold">TELEBIRR OFFICIAL</span>
+                            <span className="text-[#00f3ff] font-bold">TELEBIRR</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-500">Merchant Phone:</span>
-                            <span className="text-white font-black select-all">+251 900 789 123</span>
+                            <span className="text-gray-500">Account number:</span>
+                            <span className="text-white font-black select-all">0983351611</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Account Name:</span>
+                            <span className="text-white font-black select-all">Eyoel</span>
                           </div>
                         </>
                       ) : (
@@ -763,28 +731,14 @@ export default function App() {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-500">Account Number:</span>
-                            <span className="text-white font-black select-all">1000456123987</span>
+                            <span className="text-white font-black select-all">1000721425014</span>
                           </div>
                         </>
                       )}
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Receiver Name:</span>
-                        <span className="text-white">VIBE VAULT STREETWEAR</span>
+                        <span className="text-gray-500">Account Name:</span>
+                        <span className="text-white">Eyoel Hailu Tefera</span>
                       </div>
-                    </div>
-
-                    {/* Integrated Reference String Input (Crucial component to avoid network mapping errors) */}
-                    <div>
-                      <label className="block font-mono text-[10px] text-gray-400 uppercase tracking-wider mb-1.5">
-                        Transaction Reference ID String
-                      </label>
-                      <input 
-                        type="text"
-                        value={transactionReference}
-                        onChange={(e) => setTransactionReference(e.target.value)}
-                        placeholder="e.g. FT2619582XQ or T7A92..."
-                        className="w-full bg-[#101010] border border-[#222] rounded-lg p-3 text-xs font-mono text-white uppercase tracking-wide focus:border-[#00f3ff] focus:outline-none transition-colors"
-                      />
                     </div>
 
                     {/* Document Receipt Input Frame */}
@@ -822,12 +776,10 @@ export default function App() {
                       </button>
                       <button 
                         onClick={() => {
-                          if (!transactionReference.trim()) {
-                            alert("Please enter your Transaction Reference Number.");
-                          } else if (!uploadedReceiptName) {
-                            alert("Please upload your snapshot transaction receipt.");
-                          } else {
+                          if (uploadedReceiptName) {
                             startSecuringProcess();
+                          } else {
+                            alert("Please upload your snapshot transaction receipt.");
                           }
                         }}
                         className="w-2/3 bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2] cursor-pointer"
@@ -838,41 +790,52 @@ export default function App() {
                   </div>
                 )}
 
-                {/* STEP 4: VERIFYING PROTOCOLS LOGSTREAM */}
+                {/* STEP 4: VERIFYING PROTOCOLS */}
                 {checkoutStep === "securing" && (
-                  <div className="p-2 flex flex-col gap-4 bg-black">
-                    <div className="flex items-center gap-3 border-b border-[#111] pb-4">
-                      <Loader2 className="w-5 h-5 text-[#00f3ff] animate-spin" />
-                      <span className="text-xs font-mono text-[#00f3ff] uppercase tracking-widest font-bold">Extracting Terminal Buffer...</span>
+                  <div className="py-8 flex flex-col items-center justify-center gap-6">
+                    <Loader2 className="w-10 h-10 text-[#00f3ff] animate-spin" />
+                    <div className="text-center">
+                      <h3 className="text-md font-mono font-black uppercase tracking-wider text-white">SECURE COURIER DISPATCH</h3>
+                      <p className="text-xs font-mono text-gray-500 mt-1">Initializing secure order log...</p>
                     </div>
-                    <div className="h-48 bg-[#030303] border border-[#151515] p-4 rounded-xl overflow-y-auto font-mono text-[10px] text-gray-500 space-y-2">
-                      {verificationLogs.map((log, lIdx) => (
-                        <div key={lIdx} className="font-mono flex items-start gap-1">
-                          <span className="text-gray-700 font-mono shrink-0">&gt;</span>
-                          <span className={log.includes("SUCCESSFULLY") || log.includes("VERIFIED") ? "text-[#a8ffb2]" : "text-gray-400"}>
-                            {log}
-                          </span>
+
+                    <div className="w-full bg-black border border-[#1a1a1a] rounded-lg p-4 font-mono text-[10px] leading-relaxed text-gray-400 h-40 overflow-y-auto text-left space-y-1">
+                      {verificationLogs.map((log, idx) => (
+                        <div key={idx} className={idx === verificationLogs.length - 1 ? "text-[#00f3ff] font-bold" : ""}>
+                          &gt; {log}
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* STEP 5: SUCCESS REDIRECT */}
+                {/* STEP 5: SUCCESS & CONGRATS */}
                 {checkoutStep === "success" && (
-                  <div className="p-4 flex flex-col items-center text-center gap-6">
+                  <div className="py-8 flex flex-col items-center justify-center gap-6 text-center">
                     <div className="w-16 h-16 rounded-full bg-[#a8ffb2]/10 border border-[#a8ffb2] flex items-center justify-center text-[#a8ffb2]">
                       <Check className="w-8 h-8" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-display font-black uppercase text-white tracking-wide">Look Secured Successfully</h2>
-                      <p className="text-[11px] font-mono text-gray-500 mt-2 leading-relaxed">
-                        Your transaction data was verified via backend scripts. Serial item <span className="text-white font-bold">[{checkoutProduct.serial}]</span> has been locked.
-                      </p>
+                      <h3 className="text-xl font-mono font-black uppercase tracking-wider text-white">FIT SECURED</h3>
+                      <p className="text-xs font-mono text-[#a8ffb2] mt-1 font-bold">DISPATCH QUEUED SUCCESSFULLY</p>
                     </div>
-                    <button onClick={() => { setIsCheckoutOpen(false); setIsChatOpen(true); }} className="w-full bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2] cursor-pointer">
-                      Connect with Concierge
-                    </button>
+                    <p className="text-xs font-mono text-gray-400 leading-relaxed max-w-sm">
+                      We will personally verify your payment and get back to you shortly. Our dispatch team will reach out at <strong className="text-white">{deliveryPhone}</strong> once your order is processed for courier routing!
+                    </p>
+                    <div className="flex gap-4 w-full max-w-xs mt-2">
+                      <button 
+                        onClick={() => { setIsCheckoutOpen(false); setIsChatOpen(true); }}
+                        className="flex-1 bg-white text-black py-3 rounded-lg font-mono font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        Style Outfit <Sparkles className="w-3.5 h-3.5" />
+                      </button>
+                      <button 
+                        onClick={() => setIsCheckoutOpen(false)}
+                        className="flex-1 bg-transparent border border-[#222] text-white py-3 rounded-lg font-mono font-bold text-[10px] uppercase tracking-wider hover:border-white transition-all cursor-pointer"
+                      >
+                        Close Portal
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
