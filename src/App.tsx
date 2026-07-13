@@ -781,8 +781,8 @@ export default function App() {
                         Submit Receipt
                       </button>
                     </div>
-                  </div>
-                )}
+                  </div> // Closes the payment div
+                )} // Closes the checkoutStep === "payment" block
 
                 {/* STEP 4: VERIFYING PROTOCOLS */}
                 {checkoutStep === "securing" && (
