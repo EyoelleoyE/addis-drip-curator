@@ -89,6 +89,17 @@ interface ChatMessage {
 export default function App() {
   const [activeSection, setActiveSection] = useState<"women" | "men">("women");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [activeSection, setActiveSection] = useState<"women" | "men">("women");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
+  // Checkout modal state
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [checkoutProduct, setCheckoutProduct] = useState<Product | null>(null);
+  const [checkoutStep, setCheckoutStep] = useState<"review" | "securing" | "success">("review");
+  const [verificationLogs, setVerificationLogs] = useState<string[]>([]);
+  
+  // PLACE THE RECEIPT PREVIEW STATE HERE:
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   
   // Checkout modal state
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -784,7 +795,7 @@ export default function App() {
                 </div>
               )}
 
-              {checkoutStep === "success" && (
+              {checkoutStep === "success" && checkoutProduct && (
   <div className="flex flex-col gap-6 items-center py-4">
     {/* INTERNAL CONDITIONAL: IF NOT SUBMITTED YET */}
     {!receiptPreview?.startsWith("SUBMITTED_") ? (
@@ -818,7 +829,6 @@ export default function App() {
         <form 
           onSubmit={(e) => {
             e.preventDefault();
-            // Simulates saving data securely and triggers the notification state
             setReceiptPreview("SUBMITTED_SUCCESSFULLY");
           }}
           className="w-full flex flex-col gap-4 font-mono text-xs text-left"
@@ -827,7 +837,7 @@ export default function App() {
             2. PROVIDE DISPATCH TARGET
           </h4>
 
-          {/* Full Name Input - Updated placeholder */}
+          {/* Full Name Input */}
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Full Name</label>
             <input 
