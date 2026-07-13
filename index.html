@@ -3,11 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Addis Drip</title>
+    <title>VIBE VAULT | Elite Addis Curation</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #121212;
+            --accent: #ffffff;
+            --text-muted: #888888;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: #ffffff; padding: 20px; }
+        header { text-align: center; padding: 40px 0; border-bottom: 1px solid #222; }
+        header h1 { font-size: 2.5rem; letter-spacing: 4px; font-weight: 900; text-transform: uppercase; }
+        header p { color: var(--text-muted); margin-top: 10px; font-size: 0.9rem; }
+        
+        .nav-tabs { display: flex; justify-content: center; gap: 20px; margin: 30px 0; }
+        .tab-btn { background: none; border: 1px solid #333; color: white; padding: 10px 24px; border-radius: 20px; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; transition: 0.3s; }
+        .tab-btn.active { background: var(--accent); color: black; border-color: var(--accent); }
+        
+        .section-title { font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; margin: 40px 0 20px 0; color: var(--text-muted); text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; }
+        .product-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid #1a1a1a; transition: transform 0.2s; }
+        .product-card:hover { transform: translateY(-5px); }
+        .product-img { width: 100%; height: 320px; background-size: cover; background-position: center; background-color: #222; }
+        .product-info { padding: 20px; }
+        .product-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 5px; }
+        .product-price { font-size: 1rem; color: #a8ffb2; font-weight: 600; margin-bottom: 15px; }
+        .buy-btn { width: 100%; background: var(--accent); color: black; border: none; padding: 12px; font-weight: 700; border-radius: 8px; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; }
+        
+        /* Hidden elements for layout handling */
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
 
-    <h1>Addis Drip Coming Soon</h1>
+    <header>
+        <h1>VIBE VAULT</h1>
+        <p>The Addis Elite Aesthetic • Curated From What's Trending Right Now</p>
+    </header>
 
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="filterSection('women')">Women's Vault</button>
+        <button class="tab-btn" onclick="filterSection('men')">Men's Vault</button>
+    </div>
+
+    <!-- WOMEN'S SECTION -->
+    <div id="women-section">
+        <div class="section-title">Trending Women's Collection</div>
+        <div class="grid">
+            <!-- Product 1 (Your Viral TikTok Top!) -->
+            <div class="product-card">
+                <!-- Replace 'top1.jpg' with your saved image name later -->
+                <div class="product-img" style="background-image: url('top1.jpg');"></div>
+                <div class="product-info">
+                    <div class="product-title">Aesthetic Ribbed Contour Top</div>
+                    <div class="product-price">1,450 ETB</div>
+                    <button class="buy-btn" onclick="initiatePurchase('Aesthetic Ribbed Contour Top', 1450)">Claim This Look</button>
+                </div>
+            </div>
+            <!-- Future Women's products will go here -->
+        </div>
+    </div>
+
+    <!-- MEN'S SECTION -->
+    <div id="men-section" class="hidden">
+        <div class="section-title">Trending Men's Collection</div>
+        <div class="grid">
+            <!-- Future Men's products will go here -->
+        </div>
+    </div>
+
+    <script>
+        function filterSection(gender) {
+            const womenSec = document.getElementById('women-section');
+            const menSec = document.getElementById('men-section');
+            const tabs = document.querySelectorAll('.tab-btn');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            if(gender === 'women') {
+                womenSec.classList.remove('hidden');
+                menSec.classList.add('hidden');
+                event.target.classList.add('active');
+            } else {
+                menSec.classList.remove('hidden');
+                womenSec.classList.add('hidden');
+                event.target.classList.add('active');
+            }
+        }
+
+        function initiatePurchase(itemName, price) {
+            // We will wire this button up to open your AI Agent checkout loop in Step 4!
+            alert('Securing your ' + itemName + '... Connecting to Vibe Assistant.');
+        }
+    </script>
 </body>
 </html>
