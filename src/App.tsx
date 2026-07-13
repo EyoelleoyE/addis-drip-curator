@@ -16,7 +16,12 @@ import {
   ShieldCheck, 
   TrendingUp,
   Sliders,
-  ExternalLink
+  ExternalLink,
+  MapPin,
+  Phone,
+  User,
+  UploadCloud,
+  FileCheck
 } from "lucide-react";
 
 // Product interface matching the elite items
@@ -92,11 +97,17 @@ export default function App() {
   // Checkout modal state
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [checkoutProduct, setCheckoutProduct] = useState<Product | null>(null);
-  const [checkoutStep, setCheckoutStep] = useState<"review" | "securing" | "success">("review");
+  // steps: "review" -> "details" -> "payment" -> "securing" -> "success"
+  const [checkoutStep, setCheckoutStep] = useState<"review" | "details" | "payment" | "securing" | "success">("review");
   const [verificationLogs, setVerificationLogs] = useState<string[]>([]);
   
-  // Receipt preview state
-  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  // Payment Form States
+  const [deliveryName, setDeliveryName] = useState("");
+  const [deliveryPhone, setDeliveryPhone] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"telebirr" | "cbe">("telebirr");
+  const [uploadedReceipt, setUploadedReceipt] = useState<File | null>(null);
+  const [uploadedReceiptName, setUploadedReceiptName] = useState<string>("");
 
   // Chat/Vibe Assistant state
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -173,7 +184,11 @@ export default function App() {
   const handleClaim = (product: Product) => {
     setCheckoutProduct(product);
     setCheckoutStep("review");
-    setReceiptPreview(null);
+    setDeliveryName("");
+    setDeliveryPhone("");
+    setDeliveryAddress("");
+    setUploadedReceipt(null);
+    setUploadedReceiptName("");
     setIsCheckoutOpen(true);
   };
 
@@ -185,10 +200,11 @@ export default function App() {
       "INITIALIZING EXCLUSIVE VAULT SECURE...",
       `ALLOCATING SERIAL ID: [${checkoutProduct?.serial}]`,
       "ESTABLISHING SECURE P2P LEDGER CONNECTION...",
-      "GENERATING ADDIS BOLE ZONE ROUTING PATH...",
-      "VERIFYING STOCK EXCLUSIVITY RESERVATION...",
+      `RECORDING DELIVERY METADATA: [Name: ${deliveryName}]`,
+      `ROUTING ADDIS DELIVERY SECTOR: [${deliveryAddress}]`,
+      `VERIFYING PROOF OF RECEIPT: [${uploadedReceiptName || "uploaded_receipt.jpg"}]`,
       "VAULT CERTIFICATE GEN-3 SIGNED SUCCESSFULLY",
-      "AUTHENTICATION GRANTED. ACCESS CONCIERGE CONNECTED."
+      "AUTHENTICATION GRANTED. DISPATCH PROTOCOL ARMED."
     ];
 
     let currentLogIndex = 0;
@@ -209,13 +225,12 @@ export default function App() {
   };
 
   const triggerAssistantDropStyling = (product: Product) => {
-    setIsChatOpen(true);
     setIsChatTyping(true);
 
     const introMsg: ChatMessage = {
       id: `system-prompt-${Date.now()}`,
       role: "user",
-      content: `I just secured the [${product.name}] for ${product.price} ETB! Help me style this look.`
+      content: `I just secured the [${product.name}] for ${product.price} ETB! Here are my shipping coordinates in Addis: ${deliveryAddress}. Let's get styling ideas while my delivery is on route!`
     };
 
     setMessages(prev => [...prev, introMsg]);
@@ -241,7 +256,7 @@ export default function App() {
           setMessages(prev => [...prev, {
             id: `err-${Date.now()}`,
             role: "assistant",
-            content: `✦ CONNECTION ERROR ✦\n\nI couldn't reach the main frame server. But here is premium style advice: Style the [${product.name}] with oversized heavy-cargo utility denim and minimalist brutalist sneakers. Keep the vibe dark and exclusive.`
+            content: `✦ CONNECTION ERROR ✦\n\nI couldn't reach the main frame server. But here is premium style advice: Style your newly locked [${product.name}] with oversized heavy-cargo utility denim and minimalist brutalist sneakers. Keep the vibe dark, exclusive, and wait for our Bole courier dispatch confirmation phone call.`
           }]);
         } else {
           setMessages(prev => [...prev, {
@@ -256,7 +271,7 @@ export default function App() {
         setMessages(prev => [...prev, {
           id: `err-catch-${Date.now()}`,
           role: "assistant",
-          content: `✦ SECURE SYSTEM DOWN ✦\n\nstyling connection offline. We recommend pairing [${product.name}] with layered utility straps, high-top premium boots, and a structured Habesha aesthetic knitwear to preserve local high-fashion status.`
+          content: `✦ SECURE SYSTEM DOWN ✦\n\nstyling connection offline. We recommend pairing [${product.name}] with layered utility straps, high-top premium boots, and structured modern outerwear to preserve your local high-fashion status in Addis.`
         }]);
       }
     }, 1500);
@@ -315,6 +330,13 @@ export default function App() {
         role: "assistant",
         content: `✦ OFFLINE DEVIANCE detected ✦\n\nEnsure server.ts is active on port 3000. Stylist recommended fallback: Layer your silhouettes with structural asymmetry and deep technical cargos.`
       }]);
+    }
+  };
+
+  const handleSimulateFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setUploadedReceipt(e.target.files[0]);
+      setUploadedReceiptName(e.target.files[0].name);
     }
   };
 
@@ -694,15 +716,15 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Checkout / Secured Transaction Modal Flow (FIXED & FULLY RESTORED) */}
+      {/* Checkout / Secured Transaction Modal Flow with Payment Gateway */}
       <AnimatePresence>
         {isCheckoutOpen && checkoutProduct && (
-          <div className="fixed inset-0 bg-black/95 z-55 flex items-center justify-center p-6 backdrop-blur-xl">
+          <div className="fixed inset-0 bg-black/95 z-55 flex items-center justify-center p-6 backdrop-blur-xl overflow-y-auto">
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#070707] border border-[#222] rounded-2xl max-w-lg w-full p-6 text-center relative"
+              className="bg-[#070707] border border-[#222] rounded-2xl max-w-lg w-full p-6 text-center relative my-8"
             >
               <button 
                 onClick={() => setIsCheckoutOpen(false)}
@@ -711,6 +733,7 @@ export default function App() {
                 <X className="w-5 h-5" />
               </button>
 
+              {/* Step 1: Review Item */}
               {checkoutStep === "review" && (
                 <div className="flex flex-col gap-5 pt-4">
                   <div className="flex justify-center">
@@ -737,14 +760,229 @@ export default function App() {
                   </div>
 
                   <button 
-                    onClick={startSecuringProcess}
+                    onClick={() => setCheckoutStep("details")}
                     className="w-full bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#f3ff00] transition-colors cursor-pointer mt-2"
                   >
-                    Confirm &amp; Lock Look
+                    Proceed to Delivery Details
                   </button>
                 </div>
               )}
 
+              {/* Step 2: Shipping Details Form */}
+              {checkoutStep === "details" && (
+                <div className="flex flex-col gap-5 pt-4 text-left">
+                  <div className="text-center">
+                    <h3 className="text-lg font-mono font-black uppercase tracking-wider text-white">Free Addis Delivery</h3>
+                    <p className="text-xs font-mono text-gray-400 mt-1">Submit your courier coordinates below.</p>
+                  </div>
+
+                  <div className="space-y-4 font-mono text-xs">
+                    <div>
+                      <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 text-[#00f3ff]" /> Name
+                      </label>
+                      <input 
+                        type="text" 
+                        value={deliveryName}
+                        onChange={(e) => setDeliveryName(e.target.value)}
+                        placeholder="e.g. Dawit Alula" 
+                        className="w-full bg-[#101010] border border-[#222] rounded-lg p-3 text-white focus:border-[#00f3ff] focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5 text-[#00f3ff]" /> Phone Number
+                      </label>
+                      <input 
+                        type="text" 
+                        value={deliveryPhone}
+                        onChange={(e) => setDeliveryPhone(e.target.value)}
+                        placeholder="e.g. +251 912 345 678" 
+                        className="w-full bg-[#101010] border border-[#222] rounded-lg p-3 text-white focus:border-[#00f3ff] focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-[#00f3ff]" /> Delivery Address (Addis Ababa)
+                      </label>
+                      <textarea 
+                        rows={2}
+                        value={deliveryAddress}
+                        onChange={(e) => setDeliveryAddress(e.target.value)}
+                        placeholder="e.g. Bole, behind Edna Mall, Apt 4B" 
+                        className="w-full bg-[#101010] border border-[#222] rounded-lg p-3 text-white focus:border-[#00f3ff] focus:outline-none resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2.5 mt-2">
+                    <button 
+                      onClick={() => setCheckoutStep("review")}
+                      className="w-1/3 bg-transparent border border-[#222] text-gray-400 py-4 rounded-xl font-mono text-xs uppercase hover:text-white"
+                    >
+                      Back
+                    </button>
+                    <button 
+                      onClick={() => {
+                        if (deliveryName.trim() && deliveryPhone.trim() && deliveryAddress.trim()) {
+                          setCheckoutStep("payment");
+                        } else {
+                          alert("Please fill in all courier coordinates.");
+                        }
+                      }}
+                      className="w-2/3 bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#00f3ff]"
+                    >
+                      Continue to Payment
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Local Payment Form & Receipt Upload */}
+              {checkoutStep === "payment" && (
+                <div className="flex flex-col gap-4 pt-4 text-left">
+                  <div className="text-center">
+                    <h3 className="text-lg font-mono font-black uppercase tracking-wider text-white">Select Payment Channel</h3>
+                    <p className="text-xs font-mono text-gray-400 mt-1">Make payment of <span className="text-[#a8ffb2] font-bold">{checkoutProduct.price.toLocaleString()} ETB</span> then upload screenshot receipt.</p>
+                  </div>
+
+                  {/* Payment Methods Tabs */}
+                  <div className="grid grid-cols-2 gap-3 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("telebirr")}
+                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all cursor-pointer ${
+                        paymentMethod === "telebirr" 
+                          ? "bg-[#111] border-[#00f3ff]" 
+                          : "bg-black border-[#222] hover:border-white/20"
+                      }`}
+                    >
+                      <img 
+                        src="https://upload.wikimedia.org/wikipedia/commons/1/10/Telebirr_Logo.png" 
+                        alt="Telebirr" 
+                        className="h-7 object-contain mb-1.5 filter brightness-110"
+                        onError={(e) => {
+                          // Fallback in case Wikipedia hotlinking is blocked or changes
+                          e.currentTarget.src = "https://www.ethiotelecom.et/wp-content/uploads/2021/04/telebirr-white.png";
+                        }}
+                      />
+                      <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-gray-300">Telebirr</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("cbe")}
+                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all cursor-pointer ${
+                        paymentMethod === "cbe" 
+                          ? "bg-[#111] border-[#00f3ff]" 
+                          : "bg-black border-[#222] hover:border-white/20"
+                      }`}
+                    >
+                      <img 
+                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Commercial_Bank_of_Ethiopia_logo.svg/1024px-Commercial_Bank_of_Ethiopia_logo.svg.png" 
+                        alt="CBE Birr" 
+                        className="h-7 object-contain mb-1.5 filter brightness-110"
+                        onError={(e) => {
+                          e.currentTarget.src = "https://combanketh.et/images/logo.png";
+                        }}
+                      />
+                      <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-gray-300">CBE BIRR</span>
+                    </button>
+                  </div>
+
+                  {/* Dynamic Accounts Info Block */}
+                  <div className="bg-[#101010] border border-[#1e1e1e] p-4 rounded-xl font-mono text-xs text-gray-300 space-y-2.5">
+                    {paymentMethod === "telebirr" ? (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Service:</span>
+                          <span className="text-[#00f3ff] font-bold">TELEBIRR PAY</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Merchant Phone:</span>
+                          <span className="text-white font-black select-all">0983351611</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Account Name: Eyoel</span>
+                          <span className="text-white">Vibe Vault Curations</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Bank:</span>
+                          <span className="text-[#00f3ff] font-bold">Commercial Bank of Ethiopia (CBE)</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Account Number:</span>
+                          <span className="text-white font-black select-all">1000721425014</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Account Name:</span>
+                          <span className="text-white">Eyoel Hailu Tefera</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Interactive Proof of Payment Area */}
+                  <div>
+                    <label className="block font-mono text-[10px] text-gray-400 uppercase tracking-wider mb-2">
+                      Upload Proof of Payment (Screenshot / Receipt)
+                    </label>
+                    <label className="border border-dashed border-[#333] hover:border-[#00f3ff] bg-[#0c0c0c] rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all">
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleSimulateFileChange}
+                      />
+                      {uploadedReceiptName ? (
+                        <>
+                          <FileCheck className="w-8 h-8 text-[#a8ffb2]" />
+                          <div className="text-center">
+                            <span className="block font-mono text-xs text-[#a8ffb2] font-bold max-w-xs truncate">{uploadedReceiptName}</span>
+                            <span className="block font-mono text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">Click to replace file</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <UploadCloud className="w-8 h-8 text-[#00f3ff] animate-pulse" />
+                          <div className="text-center">
+                            <span className="block font-mono text-xs text-white">Tap to upload file</span>
+                            <span className="block font-mono text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">PNG, JPG or PDF formats accepted</span>
+                          </div>
+                        </>
+                      )}
+                    </label>
+                  </div>
+
+                  <div className="flex gap-2.5 mt-2">
+                    <button 
+                      onClick={() => setCheckoutStep("details")}
+                      className="w-1/3 bg-transparent border border-[#222] text-gray-400 py-4 rounded-xl font-mono text-xs uppercase hover:text-white"
+                    >
+                      Back
+                    </button>
+                    <button 
+                      onClick={() => {
+                        if (uploadedReceiptName) {
+                          startSecuringProcess();
+                        } else {
+                          alert("Please upload your screenshot payment receipt to verify transaction.");
+                        }
+                      }}
+                      className="w-2/3 bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2]"
+                    >
+                      Submit Receipt &amp; Secure Look
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Secure Transaction Loading Screen */}
               {checkoutStep === "securing" && (
                 <div className="flex flex-col gap-6 pt-6">
                   <div className="flex justify-center">
@@ -752,7 +990,7 @@ export default function App() {
                   </div>
                   <div>
                     <h3 className="text-md font-mono font-bold uppercase tracking-widest text-white animate-pulse">Running Encryption Ledger</h3>
-                    <p className="text-xs font-mono text-gray-500 mt-1">Sourcing isolated signature keys...</p>
+                    <p className="text-xs font-mono text-gray-500 mt-1">Verifying proof of payment and dispatching courier routing...</p>
                   </div>
 
                   <div className="bg-black border border-[#1e1e1e] p-4 rounded-xl h-40 overflow-y-auto text-left font-mono text-[10px] space-y-1.5 text-gray-400 select-none scrollbar-none">
@@ -766,6 +1004,7 @@ export default function App() {
                 </div>
               )}
 
+              {/* Step 5: Success & Style Flow Initiation */}
               {checkoutStep === "success" && (
                 <div className="flex flex-col gap-5 pt-4">
                   <div className="flex justify-center">
@@ -779,7 +1018,7 @@ export default function App() {
                   </div>
 
                   <p className="text-xs font-mono text-gray-400 leading-relaxed max-w-sm mx-auto bg-[#101010] p-4 rounded-xl border border-[#1a1a1a]">
-                    Item <span className="text-white font-bold">[{checkoutProduct.serial}]</span> has been locked under your digital fashion catalog. Our Bole boutique assistant is on standby to coordinate fast-courier dispatch.
+                    Thank you, <span className="text-white font-bold">{deliveryName}</span>. Item <span className="text-[#00f3ff] font-bold">[{checkoutProduct.serial}]</span> has been locked. Our Bole boutique team will verify your receipt and call you at <span className="text-white font-bold">{deliveryPhone}</span> for dispatch.
                   </p>
 
                   <div className="w-full bg-[#101010] border border-[#1a1a1a] p-4 rounded-xl flex items-center gap-4 text-left">
@@ -787,7 +1026,7 @@ export default function App() {
                     <div>
                       <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">Styling Connection Active</h4>
                       <p className="text-[10px] font-mono text-gray-500 leading-relaxed mt-1">
-                        We have triggered Vibe Assistant to formulate a custom designer fit surrounding your new drop. Read the chat panel!
+                        We have triggered your Vibe Assistant to formulate custom fits matching this order. Open the chat panel to see styling recommendations!
                       </p>
                     </div>
                   </div>
@@ -799,7 +1038,7 @@ export default function App() {
                     }}
                     className="w-full bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2] transition-colors cursor-pointer"
                   >
-                    Connect with Concierge
+                    Open Styling Ideas
                   </button>
                 </div>
               )}
