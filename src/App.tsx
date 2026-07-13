@@ -31,7 +31,7 @@ interface Product {
   serial: string;
 }
 
-const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+
 
 const PRODUCTS: { women: Product[]; men: Product[] } = {
   women: [
