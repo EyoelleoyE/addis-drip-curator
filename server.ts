@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import { execFile } from "child_process";
 
 dotenv.config();
 
@@ -88,6 +89,52 @@ Always be helpful, crisp, concise, and incredibly stylish. No emojis except for 
       details: "Check if your GEMINI_API_KEY is configured in Settings > Secrets."
     });
   }
+});
+
+// Automated Bank & Telebirr Receipt Verification Gateway
+app.post("/api/verify-receipt", async (req, res) => {
+  const { bank, reference, expectedAmount } = req.body;
+
+  if (!bank || !reference) {
+    return res.status(400).json({ status: "FAILED", error: "Missing bank type or reference identifier string." });
+  }
+
+  // Execute the standalone python extractor process safely
+  execFile("python3", ["verify_receipt.py", bank, reference], (error, stdout, stderr) => {
+    if (error || stderr) {
+      console.error("Execution error on Python side:", stderr || error);
+      return res.status(500).json({ status: "FAILED", error: "Failed to process internal verification module ports." });
+    }
+
+    try {
+      const receiptData = JSON.parse(stdout.trim());
+
+      // If the ethiobank-receipts library raised an extraction error
+      if (receiptData.error) {
+        return res.json({ status: "FAILED", error: receiptData.error });
+      }
+
+      // Automatically cross-verify item pricing to prevent malicious manipulation
+      if (expectedAmount && Math.abs(Number(receiptData.amount) - Number(expectedAmount)) > 0.01) {
+        return res.json({
+          status: "FAILED",
+          error: `Price mismatched. Vault requires ${expectedAmount} ETB, but receipt verified only ${receiptData.amount} ETB.`
+        });
+      }
+
+      // Everything checks out perfectly
+      return res.json({
+        status: "SUCCESS",
+        reference: receiptData.reference,
+        payer: receiptData.payer_name || receiptData.payer_phone || "Bole client terminal",
+        amount: receiptData.amount
+      });
+
+    } catch (parseError) {
+      console.error("JSON parse failure from python execution script stream:", parseError);
+      return res.status(500).json({ status: "FAILED", error: "Failed to digest transaction data stream parsing." });
+    }
+  });
 });
 
 // Vite middleware and asset routing
