@@ -1,0 +1,6 @@
+{
+  "name": "Vibe Vault",
+  "description": "A hyper-premium Gen Z streetwear curation website with a server-side Gemini Vibe Assistant using Search Grounding.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
