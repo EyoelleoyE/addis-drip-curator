@@ -655,13 +655,7 @@ export default function App() {
                         }}
                         className="w-2/3 bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#00f3ff] cursor-pointer"
                       >
-                        Continue to Payment
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3: Local Payment Terminal & Receipt Submission */}
+                        {/* Step 3: Local Payment Terminal & Receipt Submission */}
                 {checkoutStep === "payment" && (
                   <div className="flex flex-col gap-4 pt-4 text-left">
                     <div className="text-center">
@@ -706,87 +700,89 @@ export default function App() {
                       </button>
                     </div>
 
-                   {/* Account Details Block */}
-<div className="bg-[#101010] border border-[#1e1e1e] p-4 rounded-xl font-mono text-xs text-gray-300 space-y-2.5">
-  {paymentMethod === "telebirr" ? (
-    <>
-      <div className="flex justify-between">
-        <span className="text-gray-500">Channel:</span>
-        <span className="text-[#00f3ff] font-bold">TELEBIRR</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-gray-500">Account number:</span>
-        <span className="text-white font-black select-all">0983351611</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-gray-500">Account Name:</span>
-        <span className="text-white font-black select-all">Eyoel</span>
-      </div>
-    </>
-  ) : (
-    <>
-      <div className="flex justify-between">
-        <span className="text-gray-500">Bank:</span>
-        <span className="text-[#00f3ff] font-bold">Commercial Bank of Ethiopia</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-gray-500">Account Number:</span>
-        <span className="text-white font-black select-all">1000721425014</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-gray-500">Account Name:</span>
-        <span className="text-white font-black select-all">Eyoel Hailu Tefera</span>
-      </div>
-    </>
-  )}
-</div>
+                    {/* Account Details Block */}
+                    <div className="bg-[#101010] border border-[#1e1e1e] p-4 rounded-xl font-mono text-xs text-gray-300 space-y-2.5">
+                      {paymentMethod === "telebirr" ? (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Channel:</span>
+                            <span className="text-[#00f3ff] font-bold">TELEBIRR</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Account number:</span>
+                            <span className="text-white font-black select-all">0983351611</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Account Name:</span>
+                            <span className="text-white font-black select-all">Eyoel</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Bank:</span>
+                            <span className="text-[#00f3ff] font-bold">Commercial Bank of Ethiopia</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Account Number:</span>
+                            <span className="text-white font-black select-all">1000721425014</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Account Name:</span>
+                            <span className="text-white font-black select-all">Eyoel Hailu Tefera</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
 
-{/* Document Receipt Input Frame */}
-<div>
-  <label className="block font-mono text-[10px] text-gray-400 uppercase tracking-wider mb-2">
-    Upload Transaction Screenshot
-  </label>
-  <label className="border border-dashed border-[#333] hover:border-[#00f3ff] bg-[#0c0c0c] rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all">
-    <input 
-      type="file" 
-      accept="image/*" 
-      className="hidden" 
-      onChange={handleSimulateFileChange}
-    />
-    {uploadedReceiptName ? (
-      <>
-        <FileCheck className="w-8 h-8 text-[#a8ffb2]" />
-        <span className="font-mono text-xs text-[#a8ffb2] font-bold max-w-xs truncate">{uploadedReceiptName}</span>
-      </>
-    ) : (
-      <>
-        <UploadCloud className="w-8 h-8 text-[#00f3ff]" />
-        <span className="font-mono text-xs text-white">Tap to upload file receipt</span>
-      </>
-    )}
-  </label>
-</div>
+                    {/* Document Receipt Input Frame */}
+                    <div>
+                      <label className="block font-mono text-[10px] text-gray-400 uppercase tracking-wider mb-2">
+                        Upload Transaction Screenshot
+                      </label>
+                      <label className="border border-dashed border-[#333] hover:border-[#00f3ff] bg-[#0c0c0c] rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={handleSimulateFileChange}
+                        />
+                        {uploadedReceiptName ? (
+                          <>
+                            <FileCheck className="w-8 h-8 text-[#a8ffb2]" />
+                            <span className="font-mono text-xs text-[#a8ffb2] font-bold max-w-xs truncate">{uploadedReceiptName}</span>
+                          </>
+                        ) : (
+                          <>
+                            <UploadCloud className="w-8 h-8 text-[#00f3ff]" />
+                            <span className="font-mono text-xs text-white">Tap to upload file receipt</span>
+                          </>
+                        )}
+                      </label>
+                    </div>
 
-<div className="flex gap-2.5 mt-2">
-  <button 
-    onClick={() => setCheckoutStep("details")}
-    className="w-1/3 bg-transparent border border-[#222] text-gray-400 py-4 rounded-xl font-mono text-xs uppercase hover:text-white cursor-pointer"
-  >
-    Back
-  </button>
-  <button 
-    onClick={() => {
-      if (uploadedReceiptName) {
-        startSecuringProcess();
-      } else {
-        alert("Please upload your snapshot transaction receipt.");
-      }
-    }}
-    className="w-2/3 bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2] cursor-pointer"
-  >
-    Submit Receipt
-  </button>
-</div>
+                    <div className="flex gap-2.5 mt-2">
+                      <button 
+                        onClick={() => setCheckoutStep("details")}
+                        className="w-1/3 bg-transparent border border-[#222] text-gray-400 py-4 rounded-xl font-mono text-xs uppercase hover:text-white cursor-pointer"
+                      >
+                        Back
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if (uploadedReceiptName) {
+                            startSecuringProcess();
+                          } else {
+                            alert("Please upload your snapshot transaction receipt.");
+                          }
+                        }}
+                        className="w-2/3 bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2] cursor-pointer"
+                      >
+                        Submit Receipt
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* STEP 4: VERIFYING PROTOCOLS */}
                 {checkoutStep === "securing" && (
