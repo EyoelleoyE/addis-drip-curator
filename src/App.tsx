@@ -804,31 +804,39 @@ export default function App() {
 )}
 
 {/* STEP 5: SUCCESS & CONGRATS */}
-{checkoutStep === "success" && (
-  <div className="py-8 flex flex-col items-center justify-center gap-6 text-center">
-    <div className="w-16 h-16 rounded-full bg-[#a8ffb2]/10 border border-[#a8ffb2] flex items-center justify-center text-[#a8ffb2]">
-      <Check className="w-8 h-8" />
+                {checkoutStep === "success" && (
+                  <div className="py-8 flex flex-col items-center justify-center gap-6 text-center">
+                    <div className="w-16 h-16 rounded-full bg-[#a8ffb2]/10 border border-[#a8ffb2] flex items-center justify-center text-[#a8ffb2]">
+                      <Check className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-mono font-black uppercase tracking-wider text-white">FIT SECURED</h3>
+                      <p className="text-xs font-mono text-[#a8ffb2] mt-1 font-bold">DISPATCH QUEUED SUCCESSFULLY</p>
+                    </div>
+                    <p className="text-xs font-mono text-gray-400 leading-relaxed max-w-sm">
+                      We will personally verify your payment and get back to you shortly. Our dispatch team will reach out at <strong className="text-white">{deliveryPhone}</strong> once your order is processed for courier routing!
+                    </p>
+                    <div className="flex gap-4 w-full max-w-xs mt-2">
+                      <button 
+                        onClick={() => { setIsCheckoutOpen(false); setIsChatOpen(true); }}
+                        className="flex-1 bg-white text-black py-3 rounded-lg font-mono font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        Style Outfit <Sparkles className="w-3.5 h-3.5" />
+                      </button>
+                      <button 
+                        onClick={() => setIsCheckoutOpen(false)}
+                        className="flex-1 bg-transparent border border-[#222] text-white py-3 rounded-lg font-mono font-bold text-[10px] uppercase tracking-wider hover:border-white transition-all cursor-pointer"
+                      >
+                        Close Portal
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div> {/* Closes the internal wrapper div */}
+            </motion.div> {/* Closes motion.div */}
+          </div> {/* Closes the modal background div */}
+        )}
+      </AnimatePresence>
     </div>
-    <div>
-      <h3 className="text-xl font-mono font-black uppercase tracking-wider text-white">FIT SECURED</h3>
-      <p className="text-xs font-mono text-[#a8ffb2] mt-1 font-bold">DISPATCH QUEUED SUCCESSFULLY</p>
-    </div>
-    <p className="text-xs font-mono text-gray-400 leading-relaxed max-w-sm">
-      We will personally verify your payment and get back to you shortly. Our dispatch team will reach out at <strong className="text-white">{deliveryPhone}</strong> once your order is processed for courier routing!
-    </p>
-    <div className="flex gap-4 w-full max-w-xs mt-2">
-      <button 
-        onClick={() => { setIsCheckoutOpen(false); setIsChatOpen(true); }}
-        className="flex-1 bg-white text-black py-3 rounded-lg font-mono font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
-      >
-        Style Outfit <Sparkles className="w-3.5 h-3.5" />
-      </button>
-      <button 
-        onClick={() => setIsCheckoutOpen(false)}
-        className="flex-1 bg-transparent border border-[#222] text-white py-3 rounded-lg font-mono font-bold text-[10px] uppercase tracking-wider hover:border-white transition-all cursor-pointer"
-      >
-        Close Portal
-      </button>
-    </div>
-  </div>
-)}
+  );
+}
