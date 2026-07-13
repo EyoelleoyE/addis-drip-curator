@@ -32,7 +32,6 @@ interface Product {
 }
 
 
-
 const PRODUCTS: { women: Product[]; men: Product[] } = {
   women: [
     {
