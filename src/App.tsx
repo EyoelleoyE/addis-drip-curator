@@ -718,10 +718,6 @@ export default function App() {
                             <span className="text-gray-500">Account number:</span>
                             <span className="text-white font-black select-all">0983351611</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">Account Name:</span>
-                            <span className="text-white font-black select-all">Eyoel</span>
-                          </div>
                         </>
                       ) : (
                         <>
