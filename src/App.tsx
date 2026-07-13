@@ -37,7 +37,7 @@ const PRODUCTS: { women: Product[]; men: Product[] } = {
       id: "contour-top",
       name: "Aesthetic Ribbed Contour Top",
       price: 1450,
-      image: "/src/assets/images/ribbed_contour_top_1783959862595.jpg",
+      image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop", // Clean premium streetwear placeholder
       desc: "Surgical body-contouring rib structure with signature raw double-stitch micro hems. Engineered to hold the perfect modern streetwear silhouette.",
       tag: "TRENDING DROP",
       stock: 4,
@@ -47,7 +47,7 @@ const PRODUCTS: { women: Product[]; men: Product[] } = {
       id: "cyber-pants",
       name: "Cyber Distressed Utility Pants",
       price: 2600,
-      image: "/src/assets/images/cyber_utility_pants_1783959886562.jpg",
+      image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop",
       desc: "Asymmetric slate grey heavy denim overlayed with multi-point hanging compression straps, industrial-grade brutalist hardware, and raw distressing.",
       tag: "LIMITED SECURED",
       stock: 2,
@@ -59,7 +59,7 @@ const PRODUCTS: { women: Product[]; men: Product[] } = {
       id: "cargo-hoodie",
       name: "Addis Oversized Cargo Hoodie",
       price: 2200,
-      image: "/src/assets/images/addis_cargo_hoodie_1783959874628.jpg",
+      image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600&auto=format&fit=crop",
       desc: "Distressed 450GSM loopback ultra-heavy cotton. Exaggerated drop-shoulder armor sleeves and high-volume pocket detailing, constructed for Addis nights.",
       tag: "MUST-COP DROP",
       stock: 3,
@@ -69,7 +69,7 @@ const PRODUCTS: { women: Product[]; men: Product[] } = {
       id: "leather-bomber",
       name: "Retro Leather Bomber Jacket",
       price: 4500,
-      image: "/src/assets/images/retro_leather_bomber_1783959898055.jpg",
+      image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=600&auto=format&fit=crop",
       desc: "Individually buffed distressed full-grain luxury leather. Featuring oversized boxy proportions, dropped shoulder seams, and custom oxidized steel zip hardware.",
       tag: "VAULT EXCLUSIVE",
       stock: 1,
@@ -421,14 +421,15 @@ export default function App() {
                     />
 
                     {/* Absolute Bottom Product Info overlay */}
+                    {/* Absolute Bottom Product Info overlay */}
                     <div className="absolute bottom-8 left-8 z-20 pr-8">
-                      <h3 className="text-2xl font-bold uppercase tracking-tight text-white line-clamp-1 group-hover:text-[#00f3ff] transition-colors font-display">
-                        {product.name}
-                      </h3>
-                      <p className="font-mono text-white/60 mt-1">{product.price.toLocaleString()} ETB</p>
-                      <p className="text-[10px] font-mono text-white/40 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        ALLOCATION LEFT: {product.stock} ITEMS
-                      </p>
+                    <h3 className="text-2xl font-bold uppercase tracking-tight text-white line-clamp-1 group-hover:text-[#f3ff00] transition-colors font-display">
+                    {product.name}
+                    </h3>
+                    <p className="font-mono text-white/60 mt-1">{product.price.toLocaleString()} ETB</p>
+                    <p className="text-[10px] font-mono text-white/40 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    ALLOCATION LEFT: {product.stock} ITEMS
+                    </p>
                     </div>
                   </div>
 
