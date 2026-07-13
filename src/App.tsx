@@ -784,41 +784,58 @@ export default function App() {
               )}
 
               {checkoutStep === "success" && (
-                <div className="flex flex-col gap-6 items-center text-center py-4">
-                  <div className="w-16 h-16 rounded-full bg-[#a8ffb2]/10 border border-[#a8ffb2] flex items-center justify-center text-[#a8ffb2] mb-2 animate-bounce">
-                    <ShieldCheck className="w-8 h-8" />
-                  </div>
+  <div className="flex flex-col gap-6 items-center text-center py-4">
+    <div className="w-16 h-16 rounded-full bg-[#a8ffb2]/10 border border-[#a8ffb2] flex items-center justify-center text-[#a8ffb2] mb-2 animate-bounce">
+      <ShieldCheck className="w-8 h-8" />
+    </div>
 
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-mono text-[#a8ffb2] tracking-[0.25em] uppercase font-bold font-mono">TRANSACTION COMPLETED</span>
-                    <h3 className="text-2xl font-display font-black text-white uppercase mt-1">Look Secured!</h3>
-                  </div>
+    <div className="flex flex-col gap-1">
+      <span className="text-[10px] font-mono text-[#a8ffb2] tracking-[0.25em] uppercase font-bold">ALLOCATION HELD</span>
+      <h3 className="text-2xl font-display font-black text-white uppercase mt-1">Look Reserved!</h3>
+    </div>
 
-                  <p className="text-xs font-mono text-gray-400 max-w-sm leading-relaxed font-mono">
-                    Drop Serial <span className="text-[#00f3ff] font-bold">[{checkoutProduct.serial}]</span> has been locked under your digital fashion catalog. Our Bole boutique assistant is on standby to coordinate fast-courier dispatch.
-                  </p>
+    <p className="text-xs font-mono text-gray-400 max-w-sm leading-relaxed">
+      Drop Serial <span className="text-[#f3ff00] font-bold">[{checkoutProduct.serial}]</span> has been locked for the next 20 minutes under your collector tier.
+    </p>
 
-                  <div className="w-full bg-[#101010] border border-[#1a1a1a] p-4 rounded-xl flex items-center gap-4 text-left">
-                    <Sparkles className="w-5 h-5 text-[#00f3ff] animate-pulse flex-shrink-0" />
-                    <div>
-                      <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider font-mono">Styling Connection Active</h4>
-                      <p className="text-[10px] font-mono text-gray-500 leading-relaxed mt-1 font-mono">
-                        We have triggered Vibe Assistant to formulate a custom designer fit surrounding your new drop. Read the chat panel!
-                      </p>
-                    </div>
-                  </div>
+    {/* EXPLICIT PAYMENT & CONTACT INFO CARD */}
+    <div className="w-full bg-[#0a0a0a] border border-[#222] p-5 rounded-xl text-left flex flex-col gap-4 font-mono text-xs">
+      <div>
+        <h4 className="text-[#f3ff00] font-bold uppercase tracking-wider mb-2">1. Secure Transfer</h4>
+        <p className="text-gray-400 text-[11px] leading-relaxed">
+          Please transfer <span className="text-white font-bold">{checkoutProduct.price.toLocaleString()} ETB</span> to lock in this drop:
+        </p>
+        <div className="mt-2 bg-[#111] p-3 rounded border border-white/5 space-y-1 text-[11px]">
+          <div><span className="text-gray-500">Telebirr:</span> <span className="text-white font-bold select-all">[Your Phone Number]</span></div>
+          <div><span className="text-gray-500">CBE Birr:</span> <span className="text-white font-bold select-all">[Your Phone Number]</span></div>
+        </div>
+      </div>
 
-                  <button 
-                    onClick={() => {
-                      setIsCheckoutOpen(false);
-                      setIsChatOpen(true);
-                    }}
-                    className="w-full bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2] transition-colors cursor-pointer"
-                  >
-                    Connect with Concierge
-                  </button>
-                </div>
-              )}
+      <div className="border-t border-white/5 pt-3">
+        <h4 className="text-[#00f3ff] font-bold uppercase tracking-wider mb-2">2. Provide Dispatch Target</h4>
+        <p className="text-gray-400 text-[11px] leading-relaxed">
+          Click the concierge button below to send your **payment screenshot**, **Telegram handle/Phone number**, and **Bole/Addis delivery address** to finalize tracking.
+        </p>
+      </div>
+    </div>
+
+    <button 
+      onClick={() => {
+        setIsCheckoutOpen(false);
+        setIsChatOpen(true);
+        // Pre-fills user context into the assistant conversation panel
+        setMessages(prev => [...prev, {
+          id: `checkout-auto-${Date.now()}`,
+          role: "user",
+          content: `I have reserved the ${checkoutProduct.name}. Here is my contact info and receipt screenshot for delivery confirmation.`
+        }]);
+      }}
+      className="w-full bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2] hover:text-black transition-colors cursor-pointer"
+    >
+      Open Concierge Chat
+    </button>
+  </div>
+)}
             </motion.div>
           </div>
         )}
