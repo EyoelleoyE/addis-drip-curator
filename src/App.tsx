@@ -784,56 +784,115 @@ export default function App() {
               )}
 
               {checkoutStep === "success" && (
-  <div className="flex flex-col gap-6 items-center text-center py-4">
-    <div className="w-16 h-16 rounded-full bg-[#a8ffb2]/10 border border-[#a8ffb2] flex items-center justify-center text-[#a8ffb2] mb-2 animate-bounce">
+  <div className="flex flex-col gap-6 items-center py-4">
+    <div className="w-16 h-16 rounded-full bg-[#a8ffb2]/10 border border-[#a8ffb2] flex items-center justify-center text-[#a8ffb2] mb-1 animate-pulse">
       <ShieldCheck className="w-8 h-8" />
     </div>
 
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 text-center">
       <span className="text-[10px] font-mono text-[#a8ffb2] tracking-[0.25em] uppercase font-bold">ALLOCATION HELD</span>
       <h3 className="text-2xl font-display font-black text-white uppercase mt-1">Look Reserved!</h3>
     </div>
 
-    <p className="text-xs font-mono text-gray-400 max-w-sm leading-relaxed">
+    <p className="text-xs font-mono text-gray-400 max-w-sm text-center leading-relaxed">
       Drop Serial <span className="text-[#f3ff00] font-bold">[{checkoutProduct.serial}]</span> has been locked for the next 20 minutes under your collector tier.
     </p>
 
-    {/* EXPLICIT PAYMENT & CONTACT INFO CARD */}
-    <div className="w-full bg-[#0a0a0a] border border-[#222] p-5 rounded-xl text-left flex flex-col gap-4 font-mono text-xs">
-      <div>
-        <h4 className="text-[#f3ff00] font-bold uppercase tracking-wider mb-2">1. Secure Transfer</h4>
-        <p className="text-gray-400 text-[11px] leading-relaxed">
-          Please transfer <span className="text-white font-bold">{checkoutProduct.price.toLocaleString()} ETB</span> to lock in this drop:
-        </p>
-        <div className="mt-2 bg-[#111] p-3 rounded border border-white/5 space-y-1 text-[11px]">
-          <div><span className="text-gray-500">Telebirr:</span> <span className="text-white font-bold select-all">0983351611 (Eyoel)</span></div>
-          <div><span className="text-gray-500">CBE Birr:</span> <span className="text-white font-bold select-all">1000721425014 (Eyoel Hailu Tefera)</span></div>
-        </div>
-      </div>
-
-      <div className="border-t border-white/5 pt-3">
-        <h4 className="text-[#00f3ff] font-bold uppercase tracking-wider mb-2">2. Provide Dispatch Target</h4>
-        <p className="text-gray-400 text-[11px] leading-relaxed">
-          Click the concierge button below to send your **payment screenshot**, **Telegram handle/Phone number**, and **Bole/Addis delivery address** to finalize tracking.
-        </p>
+    {/* BANK DETAILS TERMINAL CARD */}
+    <div className="w-full bg-[#0a0a0a] border border-[#222] p-4 rounded-xl text-left flex flex-col gap-2 font-mono text-xs">
+      <h4 className="text-[#f3ff00] font-bold uppercase tracking-wider">1. SECURE TRANSFER</h4>
+      <p className="text-gray-400 text-[11px] leading-relaxed">
+        Please transfer <span className="text-white font-bold">{checkoutProduct.price.toLocaleString()} ETB</span> to lock in this drop:
+      </p>
+      <div className="bg-[#111] p-3 rounded border border-white/5 space-y-1.5 text-[11px]">
+        <div><span className="text-gray-500">Telebirr:</span> <span className="text-white font-bold select-all">0983351611 (Eyoel)</span></div>
+        <div><span className="text-gray-500">CBE Birr:</span> <span className="text-white font-bold select-all">1000721425014 (Eyoel Hailu Tefera)</span></div>
       </div>
     </div>
 
-    <button 
-      onClick={() => {
+    {/* DISPATCH TARGET FORM */}
+    <form 
+      onSubmit={(e) => {
+        e.preventDefault();
+        // Handle form submission logic or state transitions here
+        alert("System log: Dispatch target locked. Secure validation pending.");
         setIsCheckoutOpen(false);
-        setIsChatOpen(true);
-        // Pre-fills user context into the assistant conversation panel
-        setMessages(prev => [...prev, {
-          id: `checkout-auto-${Date.now()}`,
-          role: "user",
-          content: `I have reserved the ${checkoutProduct.name}. Here is my contact info and receipt screenshot for delivery confirmation.`
-        }]);
       }}
-      className="w-full bg-white text-black py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2] hover:text-black transition-colors cursor-pointer"
+      className="w-full flex flex-col gap-4 font-mono text-xs text-left"
     >
-      Open Concierge Chat
-    </button>
+      <h4 className="text-[#00f3ff] font-bold uppercase tracking-wider border-b border-white/5 pb-2">
+        2. PROVIDE DISPATCH TARGET
+      </h4>
+
+      {/* Full Name Input */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Full Name</label>
+        <input 
+          type="text" 
+          required
+          placeholder="e.g. Eyoel Hailu"
+          className="w-full bg-[#0e0e0e] border border-[#222] text-white text-xs rounded-lg px-4 py-3 focus:border-[#f3ff00] focus:outline-none transition-all placeholder:text-gray-700"
+        />
+      </div>
+
+      {/* Phone Number Input */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Phone Number</label>
+        <input 
+          type="tel" 
+          required
+          placeholder="e.g. 0912345678"
+          className="w-full bg-[#0e0e0e] border border-[#222] text-white text-xs rounded-lg px-4 py-3 focus:border-[#f3ff00] focus:outline-none transition-all placeholder:text-gray-700"
+        />
+      </div>
+
+      {/* Delivery Address Input */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Delivery Address (Free Delivery)</label>
+        <input 
+          type="text" 
+          required
+          placeholder="e.g. Bole Atlas, near Edna Mall, Apt 4B"
+          className="w-full bg-[#0e0e0e] border border-[#222] text-white text-xs rounded-lg px-4 py-3 focus:border-[#f3ff00] focus:outline-none transition-all placeholder:text-gray-700"
+        />
+      </div>
+
+      {/* File Upload for Proof of Payment Receipt */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Proof of Payment Receipt</label>
+        <div className="relative w-full bg-[#0e0e0e] border border-dashed border-[#333] hover:border-[#00f3ff] transition-all rounded-lg p-4 flex flex-col items-center justify-center gap-1 cursor-pointer group">
+          <input 
+            type="file" 
+            required
+            accept="image/*"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            onChange={(e) => {
+              const fileName = e.target.files?.[0]?.name;
+              const textEl = document.getElementById("upload-file-label");
+              if (textEl && fileName) {
+                textEl.innerText = `ATTACHED: ${fileName}`;
+                textEl.classList.remove("text-gray-500");
+                textEl.classList.add("text-[#a8ffb2]", "font-bold");
+              }
+            }}
+          />
+          <span id="upload-file-label" className="text-gray-500 text-[11px] group-hover:text-white transition-colors">
+            Click to upload transfer screenshot / receipt
+          </span>
+          <span className="text-[9px] text-gray-600 uppercase tracking-widest font-bold">
+            Supports JPEG, PNG
+          </span>
+        </div>
+      </div>
+
+      {/* Submit Button */}
+      <button 
+        type="submit"
+        className="w-full bg-white text-black py-4 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-[#a8ffb2] hover:shadow-[0_0_20px_rgba(168,255,178,0.2)] transition-all duration-300 mt-2 cursor-pointer text-center"
+      >
+        Submit Order Details
+      </button>
+    </form>
   </div>
 )}
             </motion.div>
