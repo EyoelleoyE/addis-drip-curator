@@ -905,8 +905,8 @@ export default function App() {
                           <span className="text-white font-black select-all">0983351611</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-500">Account Name: Eyoel</span>
-                          <span className="text-white">Vibe Vault Curations</span>
+                          <span className="text-gray-500">Account Name:</span>
+                          <span className="text-white">Eyoel</span>
                         </div>
                       </>
                     ) : (
