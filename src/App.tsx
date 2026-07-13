@@ -806,8 +806,8 @@ export default function App() {
           Please transfer <span className="text-white font-bold">{checkoutProduct.price.toLocaleString()} ETB</span> to lock in this drop:
         </p>
         <div className="mt-2 bg-[#111] p-3 rounded border border-white/5 space-y-1 text-[11px]">
-          <div><span className="text-gray-500">Telebirr:</span> <span className="text-white font-bold select-all">[Your Phone Number]</span></div>
-          <div><span className="text-gray-500">CBE Birr:</span> <span className="text-white font-bold select-all">[Your Phone Number]</span></div>
+          <div><span className="text-gray-500">Telebirr:</span> <span className="text-white font-bold select-all">0983351611 (Eyoel)</span></div>
+          <div><span className="text-gray-500">CBE Birr:</span> <span className="text-white font-bold select-all">1000721425014 (Eyoel Hailu Tefera)</span></div>
         </div>
       </div>
 
