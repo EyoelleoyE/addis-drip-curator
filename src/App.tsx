@@ -24,6 +24,11 @@ import {
   FileCheck
 } from "lucide-react";
 
+import { supabase } from './supabaseClient';
+
+// Inside your App function:
+console.log("Supabase connected:", supabase ? "Yes" : "No");
+
 interface Product {
   id: string;
   name: string;
@@ -161,6 +166,17 @@ export default function App() {
       }
       handleClaim(matchedProd);
     };
+
+    useEffect(() => {
+  console.log("Testing Supabase connection...");
+  supabase.from('orders').select('*').limit(1).then(({ data, error }) => {
+    if (error) {
+      console.error("Connection failed:", error.message);
+    } else {
+      console.log("Connection successful! Database is reachable.");
+    }
+  });
+}, []);
 
     return () => {
       delete (window as any).filterSection;
